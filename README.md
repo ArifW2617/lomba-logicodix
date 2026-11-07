@@ -1,1 +1,1 @@
-# logicodix
+# lomba-logicodix
