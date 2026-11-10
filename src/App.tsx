@@ -37,36 +37,50 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500/30 selection:text-rose-200">
-      {/* Navigation Header */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onOpenEmergency={() => setEmergencyOpen(true)}
-        quizScore={quizScore}
-      />
+    <div className="min-h-screen flex flex-col">
+      <div className="wrap flex-1 flex flex-col w-full">
+        {/* Navigation Header */}
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenEmergency={() => setEmergencyOpen(true)}
+          quizScore={quizScore}
+        />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'assistant' && (
-          <AiScannerTab
-            onGoToQuiz={() => setActiveTab('quiz')}
-            onGoToSimulation={() => setActiveTab('simulation')}
-          />
-        )}
+        {/* Main Content Area */}
+        <main className="flex-1 w-full">
+          {activeTab === 'assistant' && (
+            <AiScannerTab
+              onGoToQuiz={() => setActiveTab('quiz')}
+              onGoToSimulation={() => setActiveTab('simulation')}
+            />
+          )}
 
-        {activeTab === 'simulation' && (
-          <SimulationTab onAddScore={handleAddScore} />
-        )}
+          {activeTab === 'simulation' && (
+            <div className="py-7">
+              <SimulationTab onAddScore={handleAddScore} />
+            </div>
+          )}
 
-        {activeTab === 'quiz' && (
-          <QuizTab score={quizScore} onAddScore={handleAddScore} />
-        )}
+          {activeTab === 'quiz' && (
+            <div className="py-7">
+              <QuizTab score={quizScore} onAddScore={handleAddScore} />
+            </div>
+          )}
 
-        {activeTab === 'education' && <EducationTab />}
+          {activeTab === 'education' && (
+            <div className="py-7">
+              <EducationTab />
+            </div>
+          )}
 
-        {activeTab === 'url-scanner' && <UrlInspectorTab />}
-      </main>
+          {activeTab === 'url-scanner' && (
+            <div className="py-7">
+              <UrlInspectorTab />
+            </div>
+          )}
+        </main>
+      </div>
 
       {/* Emergency Modal Pop-up */}
       <EmergencyModal
@@ -75,20 +89,14 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/95 py-8 text-xs text-slate-400 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-cyan-400 font-bold text-xs">
-              C
-            </div>
-            <span className="font-bold text-slate-200">Cek Dulu</span>
-            <span className="text-slate-600">•</span>
-            <span>Platform Edukasi Anti-Penipuan Berbasis AI</span>
-          </div>
-
-          <div className="text-center sm:text-right text-slate-500 text-[11px] max-w-md leading-relaxed">
-            Edukasi publik siber untuk masyarakat Indonesia. Jangan pernah membagikan kode OTP, PIN m-banking, nomor kartu, atau menginstal berkas .APK dari sumber asing.
-          </div>
+      <footer className="app-footer">
+        <div className="wrap">
+          <span>
+            <b>Cek Dulu</b> · Edukasi anti-penipuan digital untuk masyarakat Indonesia
+          </span>
+          <span>
+            Jangan pernah membagikan OTP, PIN, nomor kartu, atau memasang .APK dari sumber asing.
+          </span>
         </div>
       </footer>
     </div>

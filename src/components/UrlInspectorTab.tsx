@@ -4,7 +4,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   Globe,
-  ExternalLink,
   Search,
   CheckCircle2,
   XCircle,
@@ -38,48 +37,59 @@ export const UrlInspectorTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'grid', gap: '24px' }}>
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold mb-2 border border-cyan-500/20">
-            <Globe className="w-3.5 h-3.5" />
-            Pemeriksa Keaslian Tautan & Domain
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Detektor Situs Web Tiruan (Phishing) & Tautan Berbahaya
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Cek apakah tautan yang Anda terima adalah situs resmi bank, web phishing dengan domain tiruan, atau link download malware otomatis.
-          </p>
+      <div style={{ borderBottom: '1px solid var(--line)', paddingBottom: '20px' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '4px 12px',
+            borderRadius: '999px',
+            background: 'var(--brand-soft)',
+            color: 'var(--brand)',
+            fontSize: '13px',
+            fontWeight: 600,
+            marginBottom: '8px',
+          }}
+        >
+          <Globe className="w-3.5 h-3.5" />
+          Pemeriksa Keaslian Tautan & Domain
         </div>
+        <h1 className="hero-h1" style={{ fontSize: '28px', margin: '0 0 6px' }}>
+          Detektor Situs Web Tiruan (Phishing) & Tautan Berbahaya
+        </h1>
+        <p className="lead" style={{ margin: 0, maxWidth: '100%' }}>
+          Cek apakah tautan yang Anda terima adalah situs resmi bank, web phishing dengan domain tiruan, atau link download malware otomatis.
+        </p>
       </div>
 
       {/* Input Form */}
-      <div className="max-w-3xl mx-auto space-y-4">
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <label htmlFor="url-input" className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <Globe className="w-4 h-4 text-cyan-400" />
+      <div style={{ maxWidth: '780px', margin: '0 auto', width: '100%', display: 'grid', gap: '16px' }}>
+        <div className="card" style={{ display: 'grid', gap: '12px' }}>
+          <label htmlFor="url-input" className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Globe className="w-4 h-4" style={{ color: 'var(--brand)' }} />
             Masukkan Alamat Tautan (URL) yang Ingin Diperiksa:
           </label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <input
-                id="url-input"
-                type="text"
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                placeholder="Contoh: https://klikbca-promo-gebyar.xyz/klaim"
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleScan();
-                }}
-              />
-            </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <input
+              id="url-input"
+              type="text"
+              className="input-field"
+              style={{ flex: '1 1 280px', fontFamily: 'monospace' }}
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              placeholder="Contoh: https://klikbca-promo-gebyar.xyz/klaim"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleScan();
+              }}
+            />
             <button
               onClick={() => handleScan()}
               disabled={!inputUrl.trim()}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm transition shadow-lg shadow-cyan-600/20 flex items-center justify-center gap-2 flex-shrink-0"
+              className="cta"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 22px' }}
             >
               <Search className="w-4 h-4" />
               <span>Periksa Tautan</span>
@@ -87,17 +97,18 @@ export const UrlInspectorTab: React.FC = () => {
           </div>
 
           {/* Preset Buttons */}
-          <div className="pt-2">
-            <div className="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1">
-              <Zap className="w-3 h-3 text-amber-400" />
+          <div style={{ paddingTop: '8px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Zap className="w-3.5 h-3.5" style={{ color: 'var(--warn)' }} />
               Coba Contoh Tautan Kasus Nyata:
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="chips">
               {SAMPLE_URLS.map((s, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   onClick={() => handleSelectSample(s.url)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 transition"
+                  className="chip"
                 >
                   {s.label}
                 </button>
@@ -108,19 +119,30 @@ export const UrlInspectorTab: React.FC = () => {
 
         {/* Scan Results Card */}
         {scanResult && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6 animate-in fade-in duration-300">
+          <div className="card" style={{ display: 'grid', gap: '16px' }}>
             {/* Header info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid var(--line)', paddingBottom: '14px' }}>
               <div>
-                <div className="flex items-center gap-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                      scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high'
-                        ? 'bg-rose-500 text-white'
-                        : scanResult.riskLevel === 'medium'
-                        ? 'bg-amber-500 text-slate-950'
-                        : 'bg-emerald-500 text-white'
-                    }`}
+                    style={{
+                      padding: '2px 10px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      background:
+                        scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high'
+                          ? 'var(--danger-soft)'
+                          : scanResult.riskLevel === 'medium'
+                          ? 'var(--warn-soft)'
+                          : 'var(--ok-soft)',
+                      color:
+                        scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high'
+                          ? 'var(--danger)'
+                          : scanResult.riskLevel === 'medium'
+                          ? 'var(--warn)'
+                          : 'var(--ok)',
+                    }}
                   >
                     {scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high'
                       ? 'Berbahaya (Phishing)'
@@ -128,22 +150,22 @@ export const UrlInspectorTab: React.FC = () => {
                       ? 'Waspada'
                       : 'Terverifikasi Aman'}
                   </span>
-                  <span className="text-xs text-slate-400">
-                    Skor Bahaya: <strong>{scanResult.riskScore}/100</strong>
+                  <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+                    Skor Bahaya: <b style={{ color: 'var(--ink)' }}>{scanResult.riskScore}/100</b>
                   </span>
                 </div>
-                <div className="font-mono text-sm sm:text-base font-bold text-white mt-1 break-all">
+                <div style={{ fontFamily: 'monospace', fontSize: '16px', fontWeight: 700, color: 'var(--ink)', marginTop: '4px', wordBreak: 'break-all' }}>
                   {scanResult.hostname}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div>
                 {scanResult.isHttps ? (
-                  <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                    <Lock className="w-3.5 h-3.5" /> HTTPS Enkripsi
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: 'var(--ok)', background: 'var(--ok-soft)', padding: '6px 10px', borderRadius: '8px' }}>
+                    <Lock className="w-3.5 h-3.5" /> HTTPS Terenkripsi
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-xs text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: 'var(--danger)', background: 'var(--danger-soft)', padding: '6px 10px', borderRadius: '8px' }}>
                     <Unlock className="w-3.5 h-3.5" /> Tidak Aman (HTTP)
                   </span>
                 )}
@@ -152,39 +174,40 @@ export const UrlInspectorTab: React.FC = () => {
 
             {/* Verdict */}
             <div
-              className={`p-4 rounded-xl border text-xs sm:text-sm leading-relaxed ${
+              className={`verdict ${
                 scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high'
-                  ? 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+                  ? 'v-bad'
                   : scanResult.riskLevel === 'medium'
-                  ? 'bg-amber-950/40 border-amber-500/40 text-amber-200'
-                  : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+                  ? 'v-warn'
+                  : 'v-ok'
               }`}
+              style={{ margin: 0 }}
             >
-              <div className="font-bold mb-1 flex items-center gap-2">
+              <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 {scanResult.riskLevel === 'critical' || scanResult.riskLevel === 'high' ? (
-                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  <ShieldAlert className="w-4 h-4" />
                 ) : (
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4" />
                 )}
                 <span>Keputusan Sistem Keamanan:</span>
               </div>
-              <p>{scanResult.verdict}</p>
+              <p style={{ margin: 0 }}>{scanResult.verdict}</p>
             </div>
 
             {/* Warnings list */}
             {scanResult.warnings.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+              <div style={{ display: 'grid', gap: '8px' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
                   <AlertTriangle className="w-3.5 h-3.5" />
                   Indikator Ancaman Ditemukan:
                 </h4>
-                <div className="space-y-1.5">
+                <div style={{ display: 'grid', gap: '6px' }}>
                   {scanResult.warnings.map((w, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-rose-300 flex items-start gap-2"
+                      style={{ padding: '10px 14px', borderRadius: '8px', background: 'var(--danger-soft)', color: 'var(--danger)', fontSize: '13px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}
                     >
-                      <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                      <XCircle className="w-4 h-4 flex-shrink-0" style={{ marginTop: '2px' }} />
                       <span>{w}</span>
                     </div>
                   ))}
@@ -194,18 +217,18 @@ export const UrlInspectorTab: React.FC = () => {
 
             {/* Safe points */}
             {scanResult.safePoints.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <div style={{ display: 'grid', gap: '8px' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Indikator Keamanan Positif:
                 </h4>
-                <div className="space-y-1.5">
+                <div style={{ display: 'grid', gap: '6px' }}>
                   {scanResult.safePoints.map((s, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-emerald-300 flex items-start gap-2"
+                      style={{ padding: '10px 14px', borderRadius: '8px', background: 'var(--ok-soft)', color: 'var(--ok)', fontSize: '13px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}
                     >
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ marginTop: '2px' }} />
                       <span>{s}</span>
                     </div>
                   ))}

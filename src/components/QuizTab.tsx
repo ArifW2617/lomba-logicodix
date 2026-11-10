@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import {
   CheckCircle2,
   XCircle,
-  HelpCircle,
   Award,
-  Sparkles,
   RotateCcw,
   ArrowRight,
   Flame,
-  Check,
-  Shield,
   Lightbulb,
 } from 'lucide-react';
 import { QUIZ_QUESTIONS } from '../data/scamData';
@@ -48,7 +44,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
     if (isCorrect) {
       setStreak((prev) => prev + 1);
       setCorrectAnswersCount((prev) => prev + 1);
-      onAddScore(20 + streak * 5); // Base points + streak bonus!
+      onAddScore(20 + streak * 5);
     } else {
       setStreak(0);
     }
@@ -76,58 +72,73 @@ export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
 
   const getBadgeRank = () => {
     const accuracy = filteredQuestions.length > 0 ? (correctAnswersCount / filteredQuestions.length) * 100 : 0;
-    if (accuracy >= 85) return { title: 'Master Anti-Scam Siber', color: 'text-cyan-400', desc: 'Luar biasa! Naluri keamanan digital Anda setara analis keamanan siber.' };
-    if (accuracy >= 60) return { title: 'Penjaga Privasi Waspada', color: 'text-emerald-400', desc: 'Bagus! Anda memahami sebagian besar taktik penipuan digital terkini.' };
-    return { title: 'Detektif Pemula', color: 'text-amber-400', desc: 'Perbanyak latihan dan pelajari ensiklopedia modus agar tidak mudah terperdaya.' };
+    if (accuracy >= 85) return { title: 'Master Anti-Scam Siber', color: 'var(--brand)', desc: 'Luar biasa! Naluri keamanan digital Anda setara analis keamanan siber.' };
+    if (accuracy >= 60) return { title: 'Penjaga Privasi Waspada', color: 'var(--ok)', desc: 'Bagus! Anda memahami sebagian besar taktik penipuan digital terkini.' };
+    return { title: 'Detektif Pemula', color: 'var(--warn)', desc: 'Perbanyak latihan dan pelajari ensiklopedia modus agar tidak mudah terperdaya.' };
   };
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'grid', gap: '24px' }}>
       {/* Quiz Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '20px' }}>
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold mb-2 border border-emerald-500/20">
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              background: 'var(--brand-soft)',
+              color: 'var(--brand)',
+              fontSize: '13px',
+              fontWeight: 600,
+              marginBottom: '8px',
+            }}
+          >
             <CheckCircle2 className="w-3.5 h-3.5" />
             Kuis Pemahaman Anti-Penipuan Digital
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="hero-h1" style={{ fontSize: '28px', margin: '0 0 6px' }}>
             Uji Pengetahuan & Deteksi Celah Penipuan
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="lead" style={{ margin: 0 }}>
             Jawab pertanyaan studi kasus nyata mengenai modus APK, domain tiruan, rekayasa sosial, dan perlindungan data pribadi.
           </p>
         </div>
 
         {/* Stats Pills */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800">
-            <Flame className="w-4 h-4 text-amber-400" />
-            <div className="text-xs">
-              <span className="text-slate-400">Streak:</span>{' '}
-              <strong className="text-amber-300 font-extrabold">{streak}x</strong>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Flame className="w-4 h-4" style={{ color: 'var(--warn)' }} />
+            <div style={{ fontSize: '13px' }}>
+              <span style={{ color: 'var(--muted)' }}>Streak:</span>{' '}
+              <strong style={{ color: 'var(--warn)' }}>{streak}x</strong>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-950/60 border border-indigo-500/40">
-            <Award className="w-4 h-4 text-cyan-400" />
-            <div className="text-xs">
-              <span className="text-slate-400">Poin:</span>{' '}
-              <strong className="text-white font-extrabold">{score} XP</strong>
+          <div className="card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--brand-soft)', borderColor: 'var(--brand)' }}>
+            <Award className="w-4 h-4" style={{ color: 'var(--brand)' }} />
+            <div style={{ fontSize: '13px' }}>
+              <span style={{ color: 'var(--muted)' }}>Poin:</span>{' '}
+              <strong style={{ color: 'var(--brand)' }}>{score} XP</strong>
             </div>
           </div>
         </div>
       </div>
 
       {/* Category Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+      <div className="chips" style={{ borderBottom: '1px solid var(--line)', paddingBottom: '14px' }}>
         {(['Semua', 'Pemula', 'Menengah', 'Mahir'] as const).map((cat) => (
           <button
             key={cat}
+            type="button"
             onClick={() => handleRestart(cat)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeCategory === cat
-                ? 'bg-slate-800 text-cyan-300 border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className="chip"
+            style={{
+              background: activeCategory === cat ? 'var(--brand)' : 'var(--surface)',
+              color: activeCategory === cat ? 'var(--brand-ink)' : 'var(--ink)',
+              borderColor: activeCategory === cat ? 'var(--brand)' : 'var(--line)',
+            }}
           >
             {cat} {cat === 'Semua' ? `(${QUIZ_QUESTIONS.length})` : ''}
           </button>
@@ -135,94 +146,114 @@ export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
       </div>
 
       {!isFinished && currentQuestion ? (
-        /* Question Card */
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div style={{ maxWidth: '780px', margin: '0 auto', width: '100%', display: 'grid', gap: '18px' }}>
           {/* Progress bar */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-semibold text-slate-400">
+          <div style={{ display: 'grid', gap: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>
               <span>
                 Pertanyaan {currentIndex + 1} dari {filteredQuestions.length}
               </span>
-              <span className="text-cyan-400">Tingkat: {currentQuestion.category}</span>
+              <span style={{ color: 'var(--brand)' }}>Tingkat: {currentQuestion.category}</span>
             </div>
-            <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-              <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-300"
-                style={{ width: `${((currentIndex + 1) / filteredQuestions.length) * 100}%` }}
-              />
+            <div className="meter" style={{ margin: 0 }}>
+              <i style={{ width: `${((currentIndex + 1) / filteredQuestions.length) * 100}%`, background: 'var(--brand)' }} />
             </div>
           </div>
 
-          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 sm:p-8 shadow-xl space-y-5">
-            <h2 className="text-base sm:text-lg font-bold text-white leading-relaxed">
+          <div className="card" style={{ display: 'grid', gap: '18px', padding: '28px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1.5 }}>
               {currentQuestion.question}
             </h2>
 
             {/* Optional Scenario Snippet */}
             {currentQuestion.scenarioSnippet && (
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-amber-300">
+              <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'var(--warn-soft)', border: '1px solid var(--warn)', color: 'var(--warn)', fontFamily: 'monospace', fontSize: '13px' }}>
                 🔍 {currentQuestion.scenarioSnippet}
               </div>
             )}
 
             {/* Options List */}
-            <div className="space-y-3 pt-2">
+            <div style={{ display: 'grid', gap: '10px' }}>
               {currentQuestion.options.map((option, idx) => {
                 const isSelected = selectedOption === idx;
                 const isCorrect = idx === currentQuestion.correctAnswer;
 
-                let cardStyle = 'bg-slate-950/70 border-slate-800 hover:border-slate-700 text-slate-200';
+                let bg = 'var(--surface)';
+                let border = 'var(--line)';
+                let color = 'var(--ink)';
+
                 if (isSubmitted) {
                   if (isCorrect) {
-                    cardStyle = 'bg-emerald-950/60 border-emerald-500 text-emerald-200 font-semibold';
+                    bg = 'var(--ok-soft)';
+                    border = 'var(--ok)';
+                    color = 'var(--ok)';
                   } else if (isSelected) {
-                    cardStyle = 'bg-rose-950/60 border-rose-500 text-rose-200';
+                    bg = 'var(--danger-soft)';
+                    border = 'var(--danger)';
+                    color = 'var(--danger)';
                   } else {
-                    cardStyle = 'bg-slate-950/40 border-slate-900 text-slate-500';
+                    bg = 'var(--bg)';
+                    color = 'var(--muted)';
                   }
                 } else if (isSelected) {
-                  cardStyle = 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-600/10';
+                  bg = 'var(--brand-soft)';
+                  border = 'var(--brand)';
+                  color = 'var(--brand)';
                 }
 
                 return (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => handleSelect(idx)}
                     disabled={isSubmitted}
-                    className={`w-full text-left p-4 rounded-xl border text-xs sm:text-sm transition flex items-center justify-between gap-3 ${cardStyle}`}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '14px 16px',
+                      borderRadius: '12px',
+                      border: `1.5px solid ${border}`,
+                      background: bg,
+                      color: color,
+                      fontSize: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      transition: 'all 0.15s ease',
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ width: '26px', height: '26px', borderRadius: '999px', background: 'var(--bg)', border: '1px solid var(--line)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
                         {String.fromCharCode(65 + idx)}
                       </span>
                       <span>{option}</span>
                     </div>
 
-                    {isSubmitted && isCorrect && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    )}
-                    {isSubmitted && isSelected && !isCorrect && (
-                      <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
-                    )}
+                    {isSubmitted && isCorrect && <CheckCircle2 className="w-5 h-5 flex-shrink-0" />}
+                    {isSubmitted && isSelected && !isCorrect && <XCircle className="w-5 h-5 flex-shrink-0" />}
                   </button>
                 );
               })}
             </div>
 
             {/* Submit or Next Button */}
-            <div className="pt-4 flex justify-end">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
               {!isSubmitted ? (
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   disabled={selectedOption === null}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/20"
+                  className="cta"
                 >
                   Kunci Jawaban
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={handleNext}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold text-sm transition flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+                  className="cta"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                   <span>
                     {currentIndex + 1 === filteredQuestions.length ? 'Lihat Hasil Akhir' : 'Pertanyaan Berikutnya'}
@@ -234,23 +265,23 @@ export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
 
             {/* Explanation Box */}
             {isSubmitted && (
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2 animate-in fade-in duration-200">
-                <div className="font-bold flex items-center gap-2">
+              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--line)', fontSize: '14px', color: 'var(--ink)', display: 'grid', gap: '8px' }}>
+                <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {selectedOption === currentQuestion.correctAnswer ? (
-                    <span className="text-emerald-400 flex items-center gap-1.5">
+                    <span style={{ color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <CheckCircle2 className="w-4 h-4" /> Jawaban Benar (+20 XP)
                     </span>
                   ) : (
-                    <span className="text-rose-400 flex items-center gap-1.5">
+                    <span style={{ color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <XCircle className="w-4 h-4" /> Jawaban Salah
                     </span>
                   )}
                 </div>
-                <p className="leading-relaxed text-slate-300">{currentQuestion.explanation}</p>
-                <div className="pt-2 border-t border-slate-800/80 text-amber-300 text-xs flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.5 }}>{currentQuestion.explanation}</p>
+                <div style={{ paddingTop: '8px', borderTop: '1px solid var(--line)', color: 'var(--warn)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Lightbulb className="w-4 h-4 flex-shrink-0" />
                   <span>
-                    <strong>Tips Ahli:</strong> {currentQuestion.proTip}
+                    <b>Tips Ahli:</b> {currentQuestion.proTip}
                   </span>
                 </div>
               </div>
@@ -258,44 +289,46 @@ export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
           </div>
         </div>
       ) : (
-        /* Victory / Finish Card */
-        <div className="max-w-xl mx-auto bg-gradient-to-br from-slate-900 to-indigo-950/80 rounded-2xl border border-indigo-500/40 p-8 text-center space-y-6 shadow-2xl">
-          <div className="w-20 h-20 rounded-full bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center mx-auto text-cyan-400">
-            <Award className="w-10 h-10 animate-bounce" />
+        /* Victory Card */
+        <div className="card" style={{ maxWidth: '580px', margin: '0 auto', textAlign: 'center', padding: '36px', display: 'grid', gap: '20px', width: '100%' }}>
+          <div style={{ width: '70px', height: '70px', borderRadius: '999px', background: 'var(--brand-soft)', border: '1px solid var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: 'var(--brand)' }}>
+            <Award className="w-8 h-8" />
           </div>
 
           <div>
-            <span className="text-xs uppercase tracking-widest text-indigo-400 font-extrabold">
+            <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--brand)', fontWeight: 800 }}>
               Kuis Selesai
             </span>
-            <h2 className="text-2xl font-extrabold text-white mt-1">
+            <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--ink)', margin: '4px 0 8px' }}>
               Hasil Evaluasi Kuis Anti-Scam
             </h2>
-            <div className={`text-lg font-bold mt-2 ${getBadgeRank().color}`}>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: getBadgeRank().color }}>
               Gelar: {getBadgeRank().title}
             </div>
-            <p className="text-xs text-slate-300 mt-1">{getBadgeRank().desc}</p>
+            <p style={{ fontSize: '14px', color: 'var(--muted)', margin: '4px 0 0' }}>{getBadgeRank().desc}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-800">
-            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
-              <div className="text-xs text-slate-400">Skor Akurasi</div>
-              <div className="text-2xl font-black text-emerald-400 mt-1">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', padding: '16px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+            <div style={{ background: 'var(--bg)', padding: '14px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '13px', color: 'var(--muted)' }}>Skor Akurasi</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--ok)', marginTop: '4px' }}>
                 {correctAnswersCount} / {filteredQuestions.length}
               </div>
             </div>
-            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
-              <div className="text-xs text-slate-400">Total XP Akumulasi</div>
-              <div className="text-2xl font-black text-cyan-400 mt-1">
+            <div style={{ background: 'var(--bg)', padding: '14px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '13px', color: 'var(--muted)' }}>Total XP Akumulasi</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--brand)', marginTop: '4px' }}>
                 {score} XP
               </div>
             </div>
           </div>
 
-          <div className="flex gap-3 justify-center">
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <button
+              type="button"
               onClick={() => handleRestart('Semua')}
-              className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+              className="cta"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <RotateCcw className="w-4 h-4" /> Ulangi Kuis
             </button>

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
-  MessageSquareCode,
   Shield,
   ShieldAlert,
   ShieldCheck,
-  AlertTriangle,
   RotateCcw,
   Smartphone,
   Send,
@@ -17,7 +15,7 @@ import {
   Award,
 } from 'lucide-react';
 import { SIMULATION_SCENARIOS } from '../data/scamData';
-import { SimulationScenario, SimulationChoice } from '../types';
+import { SimulationChoice } from '../types';
 
 interface SimulationTabProps {
   onAddScore: (points: number) => void;
@@ -70,40 +68,35 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
   };
 
   const handleChoice = (choice: SimulationChoice) => {
-    // 1. Add user message
-    const newChat = [
+    const newChatHistory = [
       ...chatHistory,
       {
         sender: 'user' as const,
         text: choice.text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: '13:43',
       },
     ];
 
-    // 2. Calculate score impact
     const newHealth = Math.max(0, Math.min(100, cyberHealth + choice.scoreChange));
     setCyberHealth(newHealth);
+
     setLastFeedback({
       text: choice.feedback,
       isSafe: choice.isSafe,
       change: choice.scoreChange,
     });
 
-    if (choice.isSafe) {
-      onAddScore(25);
+    if (choice.scoreChange > 0) {
+      onAddScore(choice.scoreChange * 2);
     }
 
-    // 3. Move to next step or finish
-    if (!choice.nextStepId || !scenario.steps[choice.nextStepId]) {
-      setChatHistory(newChat);
-      setIsFinished(true);
-    } else {
+    if (choice.nextStepId && scenario.steps[choice.nextStepId]) {
       const nextStep = scenario.steps[choice.nextStepId];
       setCurrentStepId(choice.nextStepId);
-      // Scammer reply after brief delay effect
+
       setTimeout(() => {
         setChatHistory([
-          ...newChat,
+          ...newChatHistory,
           {
             sender: 'scammer' as const,
             text: nextStep.senderMessage,
@@ -111,86 +104,104 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
             attachment: nextStep.hasAttachment,
           },
         ]);
-      }, 300);
+      }, 500);
+    } else {
+      setChatHistory(newChatHistory);
+      setIsFinished(true);
     }
   };
 
   const currentStep = scenario.steps[currentStepId];
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'grid', gap: '24px' }}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '20px' }}>
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold mb-2 border border-cyan-500/20">
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              background: 'var(--brand-soft)',
+              color: 'var(--brand)',
+              fontSize: '13px',
+              fontWeight: 600,
+              marginBottom: '8px',
+            }}
+          >
             <Smartphone className="w-3.5 h-3.5" />
             Simulator Percakapan Scam Interaktif
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="hero-h1" style={{ fontSize: '28px', margin: '0 0 6px' }}>
             Uji Ketahanan Anda Melawan Rekayasa Sosial
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+          <p className="lead" style={{ margin: 0 }}>
             Hadapi skenario penipuan nyata dalam simulasi chat smartphone. Setiap keputusan menentukan nasib keamanan data dan saldo rekening Anda.
           </p>
         </div>
 
         {/* Cyber Health / Defense meter */}
-        <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 self-start md:self-auto">
-          <div className="p-2 rounded-lg bg-slate-800">
+        <div className="card" style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ padding: '8px', borderRadius: '8px', background: 'var(--bg)' }}>
             {cyberHealth > 70 ? (
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <ShieldCheck className="w-5 h-5" style={{ color: 'var(--ok)' }} />
             ) : cyberHealth > 40 ? (
-              <Shield className="w-5 h-5 text-amber-400" />
+              <Shield className="w-5 h-5" style={{ color: 'var(--warn)' }} />
             ) : (
-              <ShieldAlert className="w-5 h-5 text-rose-400" />
+              <ShieldAlert className="w-5 h-5" style={{ color: 'var(--danger)' }} />
             )}
           </div>
           <div>
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Integritas Pertahanan
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-24 sm:w-32 h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                <div
-                  className={`h-full transition-all duration-500 ${
-                    cyberHealth > 70
-                      ? 'bg-emerald-500'
-                      : cyberHealth > 40
-                      ? 'bg-amber-500'
-                      : 'bg-rose-500'
-                  }`}
-                  style={{ width: `${cyberHealth}%` }}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
+              <div className="meter" style={{ width: '100px', margin: 0, height: '8px' }}>
+                <i
+                  style={{
+                    width: `${cyberHealth}%`,
+                    background: cyberHealth > 70 ? 'var(--ok)' : cyberHealth > 40 ? 'var(--warn)' : 'var(--danger)',
+                  }}
                 />
               </div>
-              <span className="text-xs font-extrabold text-white">{cyberHealth}%</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ink)' }}>{cyberHealth}%</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Scenario Selector Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="chips">
         {SIMULATION_SCENARIOS.map((sc, idx) => {
           const isSelected = selectedScenarioIndex === idx;
           return (
             <button
               key={sc.id}
+              type="button"
               onClick={() => resetScenario(idx)}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition border flex items-center gap-2 ${
-                isSelected
-                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30'
-                  : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-800'
-              }`}
+              className="chip"
+              style={{
+                background: isSelected ? 'var(--brand)' : 'var(--surface)',
+                color: isSelected ? 'var(--brand-ink)' : 'var(--ink)',
+                borderColor: isSelected ? 'var(--brand)' : 'var(--line)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
             >
               <span>{sc.title}</span>
               <span
-                className={`text-[10px] px-2 py-0.5 rounded-full ${
-                  sc.difficulty === 'Mudah'
-                    ? 'bg-emerald-500/20 text-emerald-300'
-                    : sc.difficulty === 'Sedang'
-                    ? 'bg-amber-500/20 text-amber-300'
-                    : 'bg-rose-500/20 text-rose-300'
-                }`}
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                  background: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--bg)',
+                  color: isSelected ? '#fff' : 'var(--muted)',
+                }}
               >
                 {sc.difficulty}
               </span>
@@ -200,50 +211,63 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
       </div>
 
       {/* Main Simulation Viewport */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px', alignItems: 'start' }}>
         {/* Smartphone Simulator */}
-        <div className="lg:col-span-7 flex justify-center">
-          <div className="w-full max-w-md bg-slate-950 rounded-[2.5rem] border-[6px] border-slate-800 shadow-2xl overflow-hidden flex flex-col h-[650px] relative">
-            {/* Phone Top Notch / Speaker bar */}
-            <div className="h-6 bg-slate-900 flex items-center justify-between px-6 text-[11px] text-slate-400 font-medium select-none">
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '380px',
+              background: '#0b141a',
+              borderRadius: '2.2rem',
+              border: '6px solid #202c33',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '620px',
+              position: 'relative',
+              color: '#fff',
+            }}
+          >
+            {/* Phone Top Notch */}
+            <div style={{ height: '24px', background: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontSize: '11px', color: '#8696a0', userSelect: 'none' }}>
               <span>13:42</span>
-              <div className="w-16 h-3 bg-slate-950 rounded-full" />
-              <div className="flex items-center gap-1.5">
-                <span>5G</span>
-                <span className="w-4 h-2 bg-slate-400 rounded-sm inline-block" />
-              </div>
+              <div style={{ width: '60px', height: '12px', background: '#000', borderRadius: '999px' }} />
+              <span>5G</span>
             </div>
 
             {/* Chat App Header */}
-            <div className="bg-slate-900/95 border-b border-slate-800 p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div style={{ background: '#202c33', borderBottom: '1px solid #2a3942', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img
                   src={scenario.senderAvatar}
                   alt={scenario.senderName}
-                  className="w-10 h-10 rounded-full object-cover border border-slate-700"
+                  style={{ width: '38px', height: '38px', borderRadius: '999px', objectFit: 'cover', border: '1px solid #2a3942' }}
                 />
                 <div>
-                  <div className="text-sm font-bold text-white leading-tight flex items-center gap-1.5">
-                    <span>{scenario.senderName}</span>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+                    {scenario.senderName}
                   </div>
-                  <div className="text-[11px] text-emerald-400 font-medium">
+                  <div style={{ fontSize: '11px', color: '#25d366', fontWeight: 500 }}>
                     {scenario.senderSubtitle}
                   </div>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => resetScenario()}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
-                title="Mulai Ulang Kasus Ini"
+                style={{ background: 'none', border: 'none', color: '#8696a0', padding: '6px', cursor: 'pointer' }}
+                title="Mulai Ulang"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             </div>
 
             {/* Chat Bubble Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] bg-slate-950">
-              <div className="text-center my-1">
-                <span className="px-3 py-1 rounded-full bg-slate-900/90 text-slate-400 text-[10px] font-medium border border-slate-800">
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', background: '#0b141a' }}>
+              <div style={{ textAlign: 'center', margin: '4px 0' }}>
+                <span style={{ padding: '4px 12px', borderRadius: '999px', background: '#182229', color: '#8696a0', fontSize: '10px', border: '1px solid #222e35' }}>
                   Pesan Terenkripsi End-to-End
                 </span>
               </div>
@@ -253,39 +277,41 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
                 return (
                   <div
                     key={idx}
-                    className={`flex flex-col ${isScammer ? 'items-start' : 'items-end'}`}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: isScammer ? 'flex-start' : 'flex-end' }}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl p-3.5 text-xs sm:text-sm shadow-md leading-relaxed ${
-                        isScammer
-                          ? 'bg-slate-900 text-slate-100 rounded-tl-sm border border-slate-800'
-                          : 'bg-indigo-600 text-white rounded-tr-sm'
-                      }`}
+                      style={{
+                        maxWidth: '85%',
+                        borderRadius: '14px',
+                        padding: '12px 14px',
+                        fontSize: '13px',
+                        lineHeight: 1.5,
+                        background: isScammer ? '#202c33' : '#005c4b',
+                        color: isScammer ? '#e9edef' : '#fff',
+                        borderTopLeftRadius: isScammer ? '2px' : '14px',
+                        borderTopRightRadius: isScammer ? '14px' : '2px',
+                        border: isScammer ? '1px solid #2a3942' : 'none',
+                      }}
                     >
-                      <p className="whitespace-pre-line">{chat.text}</p>
+                      <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{chat.text}</p>
 
-                      {/* Fake APK Attachment Warning Box */}
                       {chat.attachment && chat.attachment.type === 'apk' && (
-                        <div className="mt-3 p-2.5 rounded-xl bg-slate-950/80 border border-rose-500/40 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
-                            <FileCode className="w-5 h-5" />
+                        <div style={{ marginTop: '10px', padding: '8px 10px', borderRadius: '8px', background: '#111b21', border: '1px solid rgba(239, 68, 68, 0.4)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <FileCode className="w-4 h-4" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs font-bold text-rose-300 truncate">
+                          <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#fca5a5', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
                               {chat.attachment.name}
                             </div>
-                            <div className="text-[10px] text-slate-400">
-                              {chat.attachment.size} • Berkas Aplikasi Android (.APK)
+                            <div style={{ fontSize: '10px', color: '#8696a0' }}>
+                              {chat.attachment.size} • Berkas APK
                             </div>
                           </div>
                         </div>
                       )}
 
-                      <div
-                        className={`text-[9px] mt-1 text-right ${
-                          isScammer ? 'text-slate-500' : 'text-indigo-200'
-                        }`}
-                      >
+                      <div style={{ fontSize: '9px', marginTop: '4px', textAlign: 'right', color: isScammer ? '#8696a0' : '#86efac' }}>
                         {chat.time}
                       </div>
                     </div>
@@ -294,20 +320,20 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
               })}
 
               {isFinished && (
-                <div className="text-center my-4">
-                  <span className="px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold">
+                <div style={{ textAlign: 'center', margin: '14px 0' }}>
+                  <span style={{ padding: '6px 14px', borderRadius: '999px', background: '#182229', color: '#e9edef', fontSize: '12px', fontWeight: 600 }}>
                     --- Simulasi Selesai ---
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Phone Bottom Footer / Fake Input Bar */}
-            <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex items-center gap-2">
-              <div className="flex-1 bg-slate-950 border border-slate-800 rounded-full px-4 py-2 text-xs text-slate-500 select-none">
+            {/* Bottom Bar */}
+            <div style={{ padding: '10px', background: '#202c33', borderTop: '1px solid #2a3942', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ flex: 1, background: '#111b21', border: '1px solid #2a3942', borderRadius: '999px', padding: '8px 14px', fontSize: '12px', color: '#8696a0', userSelect: 'none' }}>
                 {isFinished ? 'Kasus berakhir' : 'Pilih respon Anda di panel samping 👉'}
               </div>
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center opacity-70">
+              <div style={{ width: '32px', height: '32px', borderRadius: '999px', background: '#00a884', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Send className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -315,107 +341,119 @@ export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
         </div>
 
         {/* Action Decision Panel */}
-        <div className="lg:col-span-5 space-y-5">
-          {/* Recent Choice Feedback Banner */}
+        <div style={{ display: 'grid', gap: '16px' }}>
           {lastFeedback && (
             <div
-              className={`p-4 rounded-xl border ${
-                lastFeedback.isSafe
-                  ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200'
-                  : 'bg-rose-950/40 border-rose-500/50 text-rose-200'
-              } transition-all`}
+              className={`verdict ${lastFeedback.isSafe ? 'v-ok' : 'v-bad'}`}
+              style={{ margin: 0, padding: '14px 16px' }}
             >
-              <div className="flex items-center gap-2 font-bold text-sm mb-1">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>
                 {lastFeedback.isSafe ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Langkah Aman Terpuji ({lastFeedback.change > 0 ? `+${lastFeedback.change}` : lastFeedback.change}%)</span>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Langkah Aman ({lastFeedback.change > 0 ? `+${lastFeedback.change}` : lastFeedback.change}%)</span>
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-4 h-4 text-rose-400" />
-                    <span>Keputusan Sangat Berisiko ({lastFeedback.change}%)</span>
+                    <XCircle className="w-4 h-4" />
+                    <span>Keputusan Berisiko ({lastFeedback.change}%)</span>
                   </>
                 )}
               </div>
-              <p className="text-xs leading-relaxed opacity-90">{lastFeedback.text}</p>
+              <p style={{ margin: 0, fontSize: '13px' }}>{lastFeedback.text}</p>
             </div>
           )}
 
-          {/* Current Choices */}
           {!isFinished ? (
-            <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+            <div className="card" style={{ display: 'grid', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand)' }}>
                   Giliran Anda: Pilih Respon Terbaik
                 </span>
-                <span className="text-xs text-slate-400">
+                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
                   {currentStep?.choices?.length || 0} Pilihan
                 </span>
               </div>
 
-              <div className="space-y-2.5">
+              <div style={{ display: 'grid', gap: '8px' }}>
                 {currentStep?.choices?.map((choice, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => handleChoice(choice)}
-                    className="w-full text-left p-4 rounded-xl bg-slate-950 hover:bg-slate-800/90 border border-slate-800 hover:border-indigo-500/70 text-slate-200 text-xs sm:text-sm font-medium transition flex items-start justify-between gap-3 group"
+                    className="card"
+                    style={{
+                      padding: '14px',
+                      textAlign: 'left',
+                      fontSize: '14px',
+                      color: 'var(--ink)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      background: 'var(--bg)',
+                      cursor: 'pointer',
+                    }}
                   >
                     <span>{choice.text}</span>
-                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all flex-shrink-0 mt-0.5" />
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--muted)' }} />
                   </button>
                 ))}
               </div>
             </div>
           ) : (
-            /* Debrief Result Card */
-            <div className="bg-gradient-to-br from-slate-900 to-indigo-950/60 rounded-2xl border border-indigo-500/30 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-indigo-600/20 text-cyan-400">
-                  <Award className="w-7 h-7" />
+            <div className="card" style={{ display: 'grid', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ padding: '10px', borderRadius: '12px', background: 'var(--brand-soft)', color: 'var(--brand)' }}>
+                  <Award className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Evaluasi Hasil Simulasi</h3>
-                  <p className="text-xs text-slate-300">
-                    Skor Pertahanan Akhir: <strong>{cyberHealth}/100</strong>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+                    Evaluasi Hasil Simulasi
+                  </h3>
+                  <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '2px 0 0' }}>
+                    Skor Pertahanan Akhir: <b style={{ color: 'var(--brand)' }}>{cyberHealth}/100</b>
                   </p>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 space-y-2 leading-relaxed">
-                <div className="font-bold text-white text-sm">Kesimpulan Pembelajaran:</div>
-                <p>{scenario.educationalDebrief.summary}</p>
-                <div className="pt-2 border-t border-slate-800 text-emerald-300 font-semibold">
+              <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--bg)', border: '1px solid var(--line)', fontSize: '14px', color: 'var(--ink)', display: 'grid', gap: '6px' }}>
+                <div style={{ fontWeight: 700 }}>Kesimpulan Pembelajaran:</div>
+                <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.5 }}>{scenario.educationalDebrief.summary}</p>
+                <div style={{ paddingTop: '8px', borderTop: '1px solid var(--line)', color: 'var(--ok)', fontWeight: 600, fontSize: '13px' }}>
                   💡 Kunci Utama: {scenario.educationalDebrief.keyTakeaway}
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 <button
+                  type="button"
                   onClick={() => resetScenario()}
-                  className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center justify-center gap-2"
+                  className="cta"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 18px', fontSize: '14px' }}
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Mainkan Kasus Ini Lagi
+                  <RotateCcw className="w-4 h-4" /> Mainkan Lagi
                 </button>
                 <button
+                  type="button"
                   onClick={() => resetScenario((selectedScenarioIndex + 1) % SIMULATION_SCENARIOS.length)}
-                  className="flex-1 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition flex items-center justify-center gap-2"
+                  className="chip"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 18px', fontSize: '14px', fontWeight: 700 }}
                 >
                   <span>Coba Kasus Berikutnya</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Context Info */}
-          <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-xs text-slate-400 space-y-1.5">
-            <div className="font-bold text-slate-300 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="card" style={{ padding: '14px', fontSize: '13px', color: 'var(--muted)', display: 'grid', gap: '4px' }}>
+            <div style={{ fontWeight: 700, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Info className="w-3.5 h-3.5" style={{ color: 'var(--brand)' }} />
               Tentang Skenario Ini:
             </div>
-            <p>{scenario.description}</p>
-            <p className="text-[11px] text-slate-500 pt-1">
+            <p style={{ margin: 0 }}>{scenario.description}</p>
+            <p style={{ margin: 0, fontSize: '11px', paddingTop: '4px' }}>
               Data kasus nyata: {scenario.educationalDebrief.realWorldPrevalence}
             </p>
           </div>
