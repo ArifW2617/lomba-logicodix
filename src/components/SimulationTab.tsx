@@ -1,464 +1,587 @@
-import React, { useState } from 'react';
-import {
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  RotateCcw,
-  Smartphone,
-  Send,
-  FileCode,
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
-  Info,
-  ChevronRight,
-  Award,
-} from 'lucide-react';
-import { SIMULATION_SCENARIOS } from '../data/scamData';
-import { SimulationChoice } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
 
-interface SimulationTabProps {
+export interface SimulationTabProps {
   onAddScore: (points: number) => void;
 }
 
-export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
-  const [selectedScenarioIndex, setSelectedScenarioIndex] = useState(0);
-  const scenario = SIMULATION_SCENARIOS[selectedScenarioIndex];
+interface ChoiceItem {
+  text: string;
+  kind: 'good' | 'ok' | 'bad';
+  reply: string;
+  explanation: string;
+  loss?: number;
+}
 
-  const [currentStepId, setCurrentStepId] = useState<string>(scenario.initialStepId);
-  const [chatHistory, setChatHistory] = useState<
-    Array<{
-      sender: 'scammer' | 'user';
-      text: string;
-      time: string;
-      attachment?: any;
-    }>
-  >([
-    {
-      sender: 'scammer',
-      text: scenario.steps[scenario.initialStepId].senderMessage,
-      time: scenario.steps[scenario.initialStepId].timestamp,
-      attachment: scenario.steps[scenario.initialStepId].hasAttachment,
-    },
-  ]);
+interface ScenarioItem {
+  t: string;
+  lv: 'Mudah' | 'Sedang' | 'Sulit';
+  who: string;
+  no: string;
+  file?: string;
+  m: string[];
+  c: ChoiceItem[];
+  s: string[];
+}
 
-  const [cyberHealth, setCyberHealth] = useState(100);
-  const [lastFeedback, setLastFeedback] = useState<{
-    text: string;
-    isSafe: boolean;
-    change: number;
-  } | null>(null);
-  const [isFinished, setIsFinished] = useState(false);
+const START_BALANCE = 10000000;
 
-  const resetScenario = (index: number = selectedScenarioIndex) => {
-    setSelectedScenarioIndex(index);
-    const sc = SIMULATION_SCENARIOS[index];
-    setCurrentStepId(sc.initialStepId);
-    setChatHistory([
+const formatRp = (n: number) => 'Rp' + n.toLocaleString('id-ID');
+
+const SCENARIOS: ScenarioItem[] = [
+  {
+    t: 'Kurir kirim “foto paket”',
+    lv: 'Mudah',
+    who: 'Kurir J&T Budi',
+    no: '+62 821-9981-0231',
+    file: 'FOTO_PAKET_INT_08819.apk',
+    m: [
+      'Siang kak, saya kurir pengiriman. Paketnya alamatnya pudar kehujanan. Tolong cek foto paket ini, apakah benar punya kakak?',
+    ],
+    c: [
       {
-        sender: 'scammer',
-        text: sc.steps[sc.initialStepId].senderMessage,
-        time: sc.steps[sc.initialStepId].timestamp,
-        attachment: sc.steps[sc.initialStepId].hasAttachment,
+        text: 'Langsung unduh dan pasang file itu untuk melihat fotonya.',
+        kind: 'bad',
+        reply: 'Sip kak, tunggu sebentar ya…',
+        explanation:
+          'File .apk adalah aplikasi, bukan foto. Begitu terpasang, ia bisa membaca SMS OTP dan mengambil alih m-banking.',
+        loss: 3500000,
       },
-    ]);
-    setCyberHealth(100);
-    setLastFeedback(null);
-    setIsFinished(false);
+      {
+        text: 'Tolak mengunduh, lalu minta nomor resi untuk dicek di aplikasi resmi.',
+        kind: 'good',
+        reply: 'Resinya lupa kak. Pokoknya unduh saja dulu.',
+        explanation:
+          'Tepat. Kurir asli punya nomor resi dan tidak mengirim aplikasi lewat chat.',
+      },
+      {
+        text: 'Tanya: “Ini kiriman dari toko online mana, Pak?”',
+        kind: 'ok',
+        reply: 'Dari toko… sudah, unduh saja fotonya kak.',
+        explanation:
+          'Cukup aman, tetapi tidak perlu melayani. Penipu mencari orang yang mau menjawab.',
+      },
+    ],
+    s: [
+      'Berkas berakhiran .apk',
+      'Tidak menyebut toko atau nomor resi',
+      'Meminta Anda membuka sendiri lewat chat',
+    ],
+  },
+  {
+    t: 'Bank bilang tarif transfer naik',
+    lv: 'Sedang',
+    who: 'Layanan Nasabah Bank',
+    no: '+62 812-5550-1180',
+    m: [
+      'Yth. nasabah, mulai bulan ini tarif transfer naik menjadi Rp150.000/bulan.',
+      'Jika tidak setuju, isi formulir di bit.ly/form-bank dan masukkan PIN m-banking Anda.',
+    ],
+    c: [
+      {
+        text: 'Isi formulir itu agar tarifnya tidak naik.',
+        kind: 'bad',
+        reply: 'Terima kasih. Data Anda sudah kami terima.',
+        explanation:
+          'Bank asli tidak meminta PIN lewat tautan. Penipu memakainya untuk menguras rekening.',
+        loss: 4000000,
+      },
+      {
+        text: 'Telepon nomor resmi di belakang kartu ATM untuk menanyakannya.',
+        kind: 'good',
+        reply: '(Tidak ada balasan. Penipu menghilang.)',
+        explanation: 'Tepat. Selalu hubungi bank lewat nomor yang tertera di kartu.',
+      },
+      {
+        text: 'Balas: “Saya tidak setuju dengan kenaikan ini.”',
+        kind: 'ok',
+        reply: 'Silakan isi formulir tadi kak, paling lambat hari ini.',
+        explanation:
+          'Aman, tetapi Anda memberi tahu bahwa nomor ini aktif. Lebih baik abaikan dan blokir.',
+      },
+    ],
+    s: [
+      'Tautan bit.ly, bukan situs bank',
+      'Meminta PIN',
+      'Mengatasnamakan bank tanpa nama pegawai',
+    ],
+  },
+  {
+    t: 'Tawaran kerja “like video”',
+    lv: 'Sedang',
+    who: 'Admin Lowongan Online',
+    no: '+62 857-7712-4400',
+    m: [
+      'Halo kak! Dibutuhkan freelance like video YouTube, komisi Rp500 ribu per hari. Tugas pertama gratis dan langsung cair.',
+    ],
+    c: [
+      {
+        text: 'Ikuti tugas pertama, lumayan untuk tambahan.',
+        kind: 'bad',
+        reply:
+          'Hebat! Tugas berikutnya butuh deposit Rp2.000.000, nanti kembali berikut komisi.',
+        explanation:
+          'Tugas pertama hanya umpan. Setelah itu Anda diminta deposit yang tidak akan kembali.',
+        loss: 2000000,
+      },
+      {
+        text: 'Abaikan dan blokir nomornya.',
+        kind: 'good',
+        reply: '(Pesan tidak terkirim lagi.)',
+        explanation: 'Tepat. Kerja ringan dengan bayaran besar hampir pasti penipuan.',
+      },
+      {
+        text: 'Tanyakan ke teman apakah pernah dapat tawaran serupa.',
+        kind: 'ok',
+        reply: 'Kak, jangan kelamaan, kuotanya tinggal sedikit.',
+        explanation:
+          'Langkah bagus. Perhatikan juga tekanan “kuota tinggal sedikit”, itu ciri penipuan.',
+      },
+    ],
+    s: [
+      'Bayaran besar untuk kerja mudah',
+      'Tugas pertama dibayar untuk memancing',
+      'Ujung-ujungnya minta deposit',
+    ],
+  },
+  {
+    t: 'QRIS kotak donasi palsu',
+    lv: 'Sedang',
+    who: 'Pengurus Masjid Al-Ikhlas',
+    no: '+62 878-3321-9090',
+    m: [
+      'Bapak/Ibu, infak pembangunan bisa lewat QRIS baru kami. Silakan scan stiker di kotak donasi dan bayar dari ponsel.',
+    ],
+    c: [
+      {
+        text: 'Scan stikernya dan langsung bayar.',
+        kind: 'bad',
+        reply: '(Dana masuk ke rekening perorangan yang menempel stiker palsu.)',
+        explanation:
+          'Stiker QRIS bisa ditempel sembarang orang. Dana masuk ke penipu, bukan masjid.',
+        loss: 500000,
+      },
+      {
+        text: 'Cek nama penerima di layar sebelum bayar, dan tanyakan langsung ke pengurus.',
+        kind: 'good',
+        reply: 'Iya, benar itu rekening resmi kami.',
+        explanation:
+          'Tepat. Nama merchant harus sama dengan lembaganya sebelum Anda menekan bayar.',
+      },
+      {
+        text: 'Bayar Rp10.000 dulu untuk mencoba.',
+        kind: 'bad',
+        reply: '(Rp10.000 hilang, rekening penerima tetap tidak diketahui.)',
+        explanation: 'Walau kecil, uang tetap ke tujuan yang tidak diverifikasi.',
+        loss: 10000,
+      },
+    ],
+    s: [
+      'Stiker QRIS ditempel di atas yang asli',
+      'Nama penerima tidak dicek',
+      'Pembayaran tanpa konfirmasi pengurus',
+    ],
+  },
+  {
+    t: 'Suara anak minta tolong',
+    lv: 'Sulit',
+    who: 'Nomor tidak dikenal',
+    no: '+62 896-0002-4417',
+    m: [
+      '(Telepon masuk) “Ma… Ma, tolong aku! Aku ditangkap polisi!”',
+      'Lalu seorang pria: “Ibu, anak Ibu terlibat kecelakaan. Transfer Rp15 juta untuk jaminan sekarang atau ditahan.”',
+    ],
+    c: [
+      {
+        text: 'Panik dan langsung transfer agar anak segera dilepas.',
+        kind: 'bad',
+        reply: 'Cepat Bu, polisi menunggu.',
+        explanation:
+          'Suara anak ditiru dengan AI dari video yang pernah diunggah. Mereka sengaja membuat Anda panik.',
+        loss: 5000000,
+      },
+      {
+        text: 'Tutup telepon, lalu hubungi anak langsung lewat nomornya yang biasa.',
+        kind: 'good',
+        reply: '(Panggilan terputus.)',
+        explanation: 'Tepat. Cek langsung ke orang yang bersangkutan sebelum mengirim uang.',
+      },
+      {
+        text: 'Tanya: “Boleh saya bicara dengan komandan atau lihat surat penahanannya?”',
+        kind: 'ok',
+        reply: 'Tidak ada waktu, Bu! Transfer sekarang!',
+        explanation:
+          'Pertanyaan bagus, dan penipu menghindar. Tutup telepon dan cek anak Anda.',
+      },
+    ],
+    s: [
+      'Telepon dari nomor asing',
+      'Memaksa transfer saat itu juga',
+      'Suara terdengar panik tetapi tidak bisa dihubungi balik',
+    ],
+  },
+  {
+    t: 'Pinjol ilegal mengancam',
+    lv: 'Sulit',
+    who: 'Penagih Kredit Cepat',
+    no: '+62 822-0909-3344',
+    m: [
+      'Pinjaman Anda jatuh tempo besok. Total yang harus dibayar Rp4.000.000.',
+      'Jika tidak lunas, foto KTP dan data Anda kami sebar ke semua kontak.',
+    ],
+    c: [
+      {
+        text: 'Transfer ke rekening yang mereka berikan agar data tidak tersebar.',
+        kind: 'bad',
+        reply: 'Bagus. Masih ada tagihan administrasi Rp2.500.000 lagi ya.',
+        explanation:
+          'Pembayaran tidak menghentikan teror. Mereka akan terus menambah tagihan.',
+        loss: 2500000,
+      },
+      {
+        text: 'Simpan bukti pesan, tidak membayar ke rekening pribadi, dan lapor ke OJK di 157.',
+        kind: 'good',
+        reply: '(Ancaman berlanjut, tetapi Anda sudah memegang bukti.)',
+        explanation: 'Tepat. Pinjol ilegal tidak berhak menagih. Kumpulkan bukti dan laporkan.',
+      },
+      {
+        text: 'Pinjam dari aplikasi lain untuk menutup tagihan ini.',
+        kind: 'bad',
+        reply: 'Ditunggu pembayarannya.',
+        explanation:
+          'Menutup utang dengan utang baru membuat Anda terjerat lebih dalam.',
+        loss: 1000000,
+      },
+    ],
+    s: [
+      'Bunga dan denda tidak masuk akal',
+      'Mengancam menyebar data',
+      'Rekening penerima atas nama perorangan',
+    ],
+  },
+];
+
+type MessageBubble =
+  | { id: string; role: 'them'; text: string; file?: string }
+  | { id: string; role: 'me'; text: string }
+  | { id: string; role: 'dots' }
+  | {
+      id: string;
+      role: 'fb';
+      kind: 'good' | 'ok' | 'bad';
+      title: string;
+      explanation: string;
+      loss?: number;
+      clues: string[];
+    };
+
+const LVL_META: Record<'good' | 'ok' | 'bad', { label: string; cls: string }> = {
+  good: { label: 'Tepat', cls: 'good' },
+  ok: { label: 'Cukup aman', cls: 'ok' },
+  bad: { label: 'Berbahaya', cls: 'bad' },
+};
+
+export const SimulationTab: React.FC<SimulationTabProps> = ({ onAddScore }) => {
+  const [cur, setCur] = useState(0);
+  const [res, setRes] = useState<Record<number, { k: 'good' | 'ok' | 'bad'; loss: number }>>({});
+  const [messages, setMessages] = useState<MessageBubble[]>([]);
+  const [status, setStatus] = useState<'choosing' | 'typing' | 'answered'>('choosing');
+
+  const msgsContainerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Calculate remaining balance
+  const currentLoss = Object.values(res).reduce((acc, r) => acc + (r.loss || 0), 0);
+  const balance = Math.max(0, START_BALANCE - currentLoss);
+  const balanceRatio = Math.max(0, balance / START_BALANCE);
+
+  // Auto-scroll messages
+  const scrollToBottom = () => {
+    if (msgsContainerRef.current) {
+      msgsContainerRef.current.scrollTop = msgsContainerRef.current.scrollHeight + 1000;
+    }
   };
 
-  const handleChoice = (choice: SimulationChoice) => {
-    const newChatHistory = [
-      ...chatHistory,
-      {
-        sender: 'user' as const,
-        text: choice.text,
-        time: '13:43',
-      },
-    ];
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    const newHealth = Math.max(0, Math.min(100, cyberHealth + choice.scoreChange));
-    setCyberHealth(newHealth);
+  // Load a scenario
+  const startScenario = (index: number) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setCur(index);
+    setStatus('choosing');
 
-    setLastFeedback({
-      text: choice.feedback,
-      isSafe: choice.isSafe,
-      change: choice.scoreChange,
-    });
+    const s = SCENARIOS[index];
+    const initialMsgs: MessageBubble[] = s.m.map((text, j) => ({
+      id: `init-${index}-${j}`,
+      role: 'them',
+      text,
+      file: j === 0 && s.file ? s.file : undefined,
+    }));
 
-    if (choice.scoreChange > 0) {
-      onAddScore(choice.scoreChange * 2);
-    }
+    setMessages(initialMsgs);
+  };
 
-    if (choice.nextStepId && scenario.steps[choice.nextStepId]) {
-      const nextStep = scenario.steps[choice.nextStepId];
-      setCurrentStepId(choice.nextStepId);
+  // Start initial scenario on mount
+  useEffect(() => {
+    startScenario(0);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
-      setTimeout(() => {
-        setChatHistory([
-          ...newChatHistory,
+  // Pick an option
+  const handlePick = (choiceIndex: number) => {
+    const s = SCENARIOS[cur];
+    const c = s.c[choiceIndex];
+
+    setStatus('typing');
+
+    // Add user bubble and typing dots
+    setMessages((prev) => [
+      ...prev,
+      { id: `me-${Date.now()}`, role: 'me', text: c.text },
+      { id: `dots-${Date.now()}`, role: 'dots' },
+    ]);
+
+    timerRef.current = setTimeout(() => {
+      // Record result
+      const lossAmount = c.loss || 0;
+      setRes((prev) => ({
+        ...prev,
+        [cur]: { k: c.kind, loss: lossAmount },
+      }));
+
+      // Award XP
+      if (c.kind === 'good') {
+        onAddScore(50);
+      } else if (c.kind === 'ok') {
+        onAddScore(20);
+      }
+
+      // Remove dots, add scammer reply
+      setMessages((prev) => {
+        const withoutDots = prev.filter((m) => m.role !== 'dots');
+        return [
+          ...withoutDots,
+          { id: `them-${Date.now()}`, role: 'them', text: c.reply },
+        ];
+      });
+
+      // Show feedback card after 700ms
+      timerRef.current = setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
           {
-            sender: 'scammer' as const,
-            text: nextStep.senderMessage,
-            time: nextStep.timestamp,
-            attachment: nextStep.hasAttachment,
+            id: `fb-${Date.now()}`,
+            role: 'fb',
+            kind: c.kind,
+            title: LVL_META[c.kind].label,
+            explanation: c.explanation,
+            loss: c.loss,
+            clues: s.s,
           },
         ]);
-      }, 500);
-    } else {
-      setChatHistory(newChatHistory);
-      setIsFinished(true);
-    }
+        setStatus('answered');
+      }, 700);
+    }, 900);
   };
 
-  const currentStep = scenario.steps[currentStepId];
+  const currentScenario = SCENARIOS[cur];
+  const finishedCount = Object.keys(res).length;
+  const nextUnfinishedIndex = SCENARIOS.findIndex((_, i) => !res[i]);
+
+  const restartCurrentCase = () => {
+    setRes((prev) => {
+      const copy = { ...prev };
+      delete copy[cur];
+      return copy;
+    });
+    startScenario(cur);
+  };
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '20px' }}>
+    <>
+      {/* Top Section: Header & Bank Balance */}
+      <div className="sim-top">
         <div>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '4px 12px',
-              borderRadius: '999px',
-              background: 'var(--brand-soft)',
-              color: 'var(--brand)',
-              fontSize: '13px',
-              fontWeight: 600,
-              marginBottom: '8px',
-            }}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            Simulator Percakapan Scam Interaktif
-          </div>
-          <h1 className="hero-h1" style={{ fontSize: '28px', margin: '0 0 6px' }}>
-            Uji Ketahanan Anda Melawan Rekayasa Sosial
-          </h1>
-          <p className="lead" style={{ margin: 0 }}>
-            Hadapi skenario penipuan nyata dalam simulasi chat smartphone. Setiap keputusan menentukan nasib keamanan data dan saldo rekening Anda.
+          <h1 className="hero-h1">Latihan menghadapi penipuan</h1>
+          <p className="lead">
+            Baca pesan di ponsel, lalu pilih jawaban Anda. Uangnya hanya latihan, tidak ada yang
+            hilang sungguhan.
           </p>
         </div>
-
-        {/* Cyber Health / Defense meter */}
-        <div className="card" style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ padding: '8px', borderRadius: '8px', background: 'var(--bg)' }}>
-            {cyberHealth > 70 ? (
-              <ShieldCheck className="w-5 h-5" style={{ color: 'var(--ok)' }} />
-            ) : cyberHealth > 40 ? (
-              <Shield className="w-5 h-5" style={{ color: 'var(--warn)' }} />
-            ) : (
-              <ShieldAlert className="w-5 h-5" style={{ color: 'var(--danger)' }} />
-            )}
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Integritas Pertahanan
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
-              <div className="meter" style={{ width: '100px', margin: 0, height: '8px' }}>
-                <i
-                  style={{
-                    width: `${cyberHealth}%`,
-                    background: cyberHealth > 70 ? 'var(--ok)' : cyberHealth > 40 ? 'var(--warn)' : 'var(--danger)',
-                  }}
-                />
-              </div>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ink)' }}>{cyberHealth}%</span>
-            </div>
+        <div className="bank" aria-live="polite">
+          <small>Tabungan latihan Anda</small>
+          <b>{formatRp(balance)}</b>
+          <div className="bar">
+            <i style={{ width: `${balanceRatio * 100}%` }} />
           </div>
         </div>
       </div>
 
-      {/* Scenario Selector Pills */}
-      <div className="chips">
-        {SIMULATION_SCENARIOS.map((sc, idx) => {
-          const isSelected = selectedScenarioIndex === idx;
-          return (
-            <button
-              key={sc.id}
-              type="button"
-              onClick={() => resetScenario(idx)}
-              className="chip"
-              style={{
-                background: isSelected ? 'var(--brand)' : 'var(--surface)',
-                color: isSelected ? 'var(--brand-ink)' : 'var(--ink)',
-                borderColor: isSelected ? 'var(--brand)' : 'var(--line)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <span>{sc.title}</span>
-              <span
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--bg)',
-                  color: isSelected ? '#fff' : 'var(--muted)',
-                }}
-              >
-                {sc.difficulty}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Main Simulation Viewport */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px', alignItems: 'start' }}>
-        {/* Smartphone Simulator */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '380px',
-              background: '#0b141a',
-              borderRadius: '2.2rem',
-              border: '6px solid #202c33',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '620px',
-              position: 'relative',
-              color: '#fff',
-            }}
-          >
-            {/* Phone Top Notch */}
-            <div style={{ height: '24px', background: '#111b21', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontSize: '11px', color: '#8696a0', userSelect: 'none' }}>
-              <span>13:42</span>
-              <div style={{ width: '60px', height: '12px', background: '#000', borderRadius: '999px' }} />
-              <span>5G</span>
-            </div>
-
-            {/* Chat App Header */}
-            <div style={{ background: '#202c33', borderBottom: '1px solid #2a3942', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img
-                  src={scenario.senderAvatar}
-                  alt={scenario.senderName}
-                  style={{ width: '38px', height: '38px', borderRadius: '999px', objectFit: 'cover', border: '1px solid #2a3942' }}
-                />
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
-                    {scenario.senderName}
+      {/* Main Grid: Left Cases List, Right Phone Simulator */}
+      <div className="sim-grid">
+        {/* Left Section: Case Picker */}
+        <section aria-labelledby="lh">
+          <h2 id="lh" style={{ fontSize: '19px', margin: '0 0 4px', fontWeight: 800 }}>
+            Pilih kasus
+          </h2>
+          <p className="sub" id="prog">
+            {finishedCount > 0
+              ? `${finishedCount} dari ${SCENARIOS.length} kasus selesai`
+              : 'Belum ada yang diselesaikan'}
+          </p>
+          <div className="sim-list">
+            {SCENARIOS.map((s, i) => {
+              const r = res[i];
+              const isSelected = i === cur;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className="case"
+                  aria-current={isSelected}
+                  onClick={() => startScenario(i)}
+                >
+                  <div className="t">
+                    {s.t}
+                    <span>{s.lv}</span>
                   </div>
-                  <div style={{ fontSize: '11px', color: '#25d366', fontWeight: 500 }}>
-                    {scenario.senderSubtitle}
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => resetScenario()}
-                style={{ background: 'none', border: 'none', color: '#8696a0', padding: '6px', cursor: 'pointer' }}
-                title="Mulai Ulang"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
+                  {r && (
+                    <span className={`tag ${LVL_META[r.k].cls}`}>
+                      {LVL_META[r.k].label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Right Section: Phone Simulator */}
+        <section className="phone" aria-label="Simulasi percakapan">
+          {/* Phone Header */}
+          <div className="ph">
+            <div className="av">{currentScenario.who.charAt(0)}</div>
+            <div>
+              <b>{currentScenario.who}</b>
+              <small>{currentScenario.no}</small>
             </div>
+          </div>
 
-            {/* Chat Bubble Scroll Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', background: '#0b141a' }}>
-              <div style={{ textAlign: 'center', margin: '4px 0' }}>
-                <span style={{ padding: '4px 12px', borderRadius: '999px', background: '#182229', color: '#8696a0', fontSize: '10px', border: '1px solid #222e35' }}>
-                  Pesan Terenkripsi End-to-End
-                </span>
-              </div>
-
-              {chatHistory.map((chat, idx) => {
-                const isScammer = chat.sender === 'scammer';
+          {/* Messages Scroll Area */}
+          <div className="msgs" ref={msgsContainerRef} aria-live="polite">
+            {messages.map((m) => {
+              if (m.role === 'them') {
                 return (
-                  <div
-                    key={idx}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: isScammer ? 'flex-start' : 'flex-end' }}
-                  >
-                    <div
-                      style={{
-                        maxWidth: '85%',
-                        borderRadius: '14px',
-                        padding: '12px 14px',
-                        fontSize: '13px',
-                        lineHeight: 1.5,
-                        background: isScammer ? '#202c33' : '#005c4b',
-                        color: isScammer ? '#e9edef' : '#fff',
-                        borderTopLeftRadius: isScammer ? '2px' : '14px',
-                        borderTopRightRadius: isScammer ? '14px' : '2px',
-                        border: isScammer ? '1px solid #2a3942' : 'none',
-                      }}
-                    >
-                      <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{chat.text}</p>
-
-                      {chat.attachment && chat.attachment.type === 'apk' && (
-                        <div style={{ marginTop: '10px', padding: '8px 10px', borderRadius: '8px', background: '#111b21', border: '1px solid rgba(239, 68, 68, 0.4)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <FileCode className="w-4 h-4" />
-                          </div>
-                          <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#fca5a5', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                              {chat.attachment.name}
-                            </div>
-                            <div style={{ fontSize: '10px', color: '#8696a0' }}>
-                              {chat.attachment.size} • Berkas APK
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div style={{ fontSize: '9px', marginTop: '4px', textAlign: 'right', color: isScammer ? '#8696a0' : '#86efac' }}>
-                        {chat.time}
-                      </div>
-                    </div>
+                  <div key={m.id} className="b them">
+                    {m.text}
+                    {m.file && <div className="file">📎 {m.file}</div>}
                   </div>
                 );
-              })}
-
-              {isFinished && (
-                <div style={{ textAlign: 'center', margin: '14px 0' }}>
-                  <span style={{ padding: '6px 14px', borderRadius: '999px', background: '#182229', color: '#e9edef', fontSize: '12px', fontWeight: 600 }}>
-                    --- Simulasi Selesai ---
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Bar */}
-            <div style={{ padding: '10px', background: '#202c33', borderTop: '1px solid #2a3942', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ flex: 1, background: '#111b21', border: '1px solid #2a3942', borderRadius: '999px', padding: '8px 14px', fontSize: '12px', color: '#8696a0', userSelect: 'none' }}>
-                {isFinished ? 'Kasus berakhir' : 'Pilih respon Anda di panel samping 👉'}
-              </div>
-              <div style={{ width: '32px', height: '32px', borderRadius: '999px', background: '#00a884', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Send className="w-3.5 h-3.5" />
-              </div>
-            </div>
+              }
+              if (m.role === 'me') {
+                return (
+                  <div key={m.id} className="b me">
+                    {m.text}
+                  </div>
+                );
+              }
+              if (m.role === 'dots') {
+                return (
+                  <div key={m.id} className="dots">
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                );
+              }
+              if (m.role === 'fb') {
+                return (
+                  <div key={m.id} className={`fb ${LVL_META[m.kind].cls}`}>
+                    <h3>{m.title}</h3>
+                    <p>{m.explanation}</p>
+                    {m.loss ? (
+                      <p className="loss">
+                        Tabungan latihan berkurang {formatRp(m.loss)}.
+                      </p>
+                    ) : null}
+                    <b>Tanda yang bisa dikenali:</b>
+                    <ul>
+                      {m.clues.map((clue, idx) => (
+                        <li key={idx}>{clue}</li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              }
+              return null;
+            })}
           </div>
-        </div>
 
-        {/* Action Decision Panel */}
-        <div style={{ display: 'grid', gap: '16px' }}>
-          {lastFeedback && (
-            <div
-              className={`verdict ${lastFeedback.isSafe ? 'v-ok' : 'v-bad'}`}
-              style={{ margin: 0, padding: '14px 16px' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>
-                {lastFeedback.isSafe ? (
+          {/* Action Decision Area */}
+          <div className="act">
+            {status === 'choosing' && (
+              <>
+                <p>Apa yang Anda lakukan?</p>
+                {currentScenario.c.map((choice, k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className="opt"
+                    onClick={() => handlePick(k)}
+                  >
+                    {choice.text}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {status === 'typing' && (
+              <p style={{ color: 'var(--muted)', fontSize: '13px' }}>
+                Menunggu respon pengirim…
+              </p>
+            )}
+
+            {status === 'answered' && (
+              <>
+                {nextUnfinishedIndex > -1 ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Langkah Aman ({lastFeedback.change > 0 ? `+${lastFeedback.change}` : lastFeedback.change}%)</span>
+                    <button
+                      type="button"
+                      className="cta"
+                      onClick={() => startScenario(nextUnfinishedIndex)}
+                    >
+                      Kasus berikutnya
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={restartCurrentCase}
+                    >
+                      Ulangi kasus ini
+                    </button>
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-4 h-4" />
-                    <span>Keputusan Berisiko ({lastFeedback.change}%)</span>
+                    <p style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                      Semua kasus selesai. Tabungan akhir Anda {formatRp(balance)}.
+                    </p>
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={restartCurrentCase}
+                    >
+                      Ulangi kasus ini
+                    </button>
                   </>
                 )}
-              </div>
-              <p style={{ margin: 0, fontSize: '13px' }}>{lastFeedback.text}</p>
-            </div>
-          )}
-
-          {!isFinished ? (
-            <div className="card" style={{ display: 'grid', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand)' }}>
-                  Giliran Anda: Pilih Respon Terbaik
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                  {currentStep?.choices?.length || 0} Pilihan
-                </span>
-              </div>
-
-              <div style={{ display: 'grid', gap: '8px' }}>
-                {currentStep?.choices?.map((choice, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleChoice(choice)}
-                    className="card"
-                    style={{
-                      padding: '14px',
-                      textAlign: 'left',
-                      fontSize: '14px',
-                      color: 'var(--ink)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      background: 'var(--bg)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span>{choice.text}</span>
-                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--muted)' }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="card" style={{ display: 'grid', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: 'var(--brand-soft)', color: 'var(--brand)' }}>
-                  <Award className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
-                    Evaluasi Hasil Simulasi
-                  </h3>
-                  <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '2px 0 0' }}>
-                    Skor Pertahanan Akhir: <b style={{ color: 'var(--brand)' }}>{cyberHealth}/100</b>
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--bg)', border: '1px solid var(--line)', fontSize: '14px', color: 'var(--ink)', display: 'grid', gap: '6px' }}>
-                <div style={{ fontWeight: 700 }}>Kesimpulan Pembelajaran:</div>
-                <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.5 }}>{scenario.educationalDebrief.summary}</p>
-                <div style={{ paddingTop: '8px', borderTop: '1px solid var(--line)', color: 'var(--ok)', fontWeight: 600, fontSize: '13px' }}>
-                  💡 Kunci Utama: {scenario.educationalDebrief.keyTakeaway}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => resetScenario()}
-                  className="cta"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 18px', fontSize: '14px' }}
-                >
-                  <RotateCcw className="w-4 h-4" /> Mainkan Lagi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => resetScenario((selectedScenarioIndex + 1) % SIMULATION_SCENARIOS.length)}
-                  className="chip"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 18px', fontSize: '14px', fontWeight: 700 }}
-                >
-                  <span>Coba Kasus Berikutnya</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="card" style={{ padding: '14px', fontSize: '13px', color: 'var(--muted)', display: 'grid', gap: '4px' }}>
-            <div style={{ fontWeight: 700, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Info className="w-3.5 h-3.5" style={{ color: 'var(--brand)' }} />
-              Tentang Skenario Ini:
-            </div>
-            <p style={{ margin: 0 }}>{scenario.description}</p>
-            <p style={{ margin: 0, fontSize: '11px', paddingTop: '4px' }}>
-              Data kasus nyata: {scenario.educationalDebrief.realWorldPrevalence}
-            </p>
+              </>
+            )}
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 };

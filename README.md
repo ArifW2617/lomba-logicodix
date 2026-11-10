@@ -44,13 +44,3 @@ npm install
 npm run dev
 ```
 Akses di browser: `http://localhost:3000`
-
-### 3. Pengujian Otomatis
-```bash
-# Jalankan suite 15 unit test multi-provider
-npx tsx tests/unit/providerFailover.test.ts
-
-# Jalankan benchmark provider tertentu
-$env:BENCHMARK_MODE="provider-only"; $env:BENCHMARK_PROVIDER="groq"; npx tsx tests/benchmark/runner.ts
-$env:BENCHMARK_MODE="provider-only"; $env:BENCHMARK_PROVIDER="gemini-image"; npx tsx tests/benchmark/runner.ts
-```

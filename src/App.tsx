@@ -57,9 +57,7 @@ export default function App() {
           )}
 
           {activeTab === 'simulation' && (
-            <div className="py-7">
-              <SimulationTab onAddScore={handleAddScore} />
-            </div>
+            <SimulationTab onAddScore={handleAddScore} />
           )}
 
           {activeTab === 'quiz' && (
