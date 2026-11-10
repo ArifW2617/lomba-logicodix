@@ -26,6 +26,12 @@ export interface AnalysisResult {
   extractedText?: string;
   visualClues?: string[];
   source?: string;
+  provider?: 'gemini' | 'groq' | 'openrouter' | 'heuristic' | string;
+  model?: string;
+  analysisScope?: 'text' | 'multimodal' | 'text-only-degraded';
+  imageAnalysisPerformed?: boolean;
+  latencyMs?: number;
+  warnings?: string[];
   note?: string;
 }
 

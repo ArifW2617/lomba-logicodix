@@ -738,11 +738,43 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = ({ onGoToSimulation }) 
                     <span className="text-xs text-slate-400 font-medium">
                       Kategori: <strong className="text-slate-200">{result.category}</strong>
                     </span>
-                    {result.source && (
+                    {/* Provider & Model Transparency Badge (Task 06) */}
+                    {result.provider ? (
+                      <span
+                        className={`px-2 py-0.5 rounded text-[11px] font-semibold inline-flex items-center gap-1 border ${
+                          result.provider === 'gemini'
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            : result.provider === 'groq'
+                            ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                            : result.provider === 'openrouter'
+                            ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                            : 'bg-slate-800 text-slate-300 border-slate-700'
+                        }`}
+                      >
+                        <BrainCircuit className="w-3 h-3 flex-shrink-0" />
+                        <span>
+                          {result.provider === 'gemini'
+                            ? `Gemini · ${result.model || 'Vision'}`
+                            : result.provider === 'groq'
+                            ? `Groq · ${result.model || 'Qwen/Llama'}`
+                            : result.provider === 'openrouter'
+                            ? `OpenRouter · ${result.model}`
+                            : 'Heuristic Fallback'}
+                        </span>
+                        {result.analysisScope === 'text-only-degraded' && (
+                          <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1 rounded ml-1 border border-amber-500/40">
+                            Degraded Teks
+                          </span>
+                        )}
+                        {result.latencyMs !== undefined && (
+                          <span className="text-[10px] opacity-75 ml-0.5">({result.latencyMs}ms)</span>
+                        )}
+                      </span>
+                    ) : result.source ? (
                       <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-500/20 text-cyan-300 border border-indigo-500/30">
                         Model: {result.source}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-1">
                     Skor Risiko Penipuan: {result.riskScore}/100
@@ -762,6 +794,21 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = ({ onGoToSimulation }) 
                 </button>
               </div>
             </div>
+
+            {/* Visual Limitation Alert Banner (Task 06 Spec) */}
+            {(result.analysisScope === 'text-only-degraded' || (result.imageAnalysisPerformed === false && inputMode === 'screenshot')) && (
+              <div className="mt-4 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 flex items-start gap-3 text-xs text-amber-200">
+                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <strong className="text-amber-300 font-bold block">
+                    Peringatan: Analisis Gambar Gagal Dilakukan
+                  </strong>
+                  <p className="text-amber-200/90 leading-relaxed">
+                    {result.warnings?.[0] || result.note || 'Analisis gambar gagal dilakukan. Hasil saat ini hanya berdasarkan teks pendamping, bukan isi gambar.'}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Risk Gauge Bar */}
             <div className="py-5">
