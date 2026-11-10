@@ -534,7 +534,7 @@ async function runTestCaseEndpoint(tc: TestCase, isAiOnly: boolean): Promise<Tes
 
 async function main() {
   console.log('='.repeat(75));
-  console.log(`🚀 SCAMAWARE AI — BENCHMARK RUNNER [MODE: ${MODE.toUpperCase()}]`);
+  console.log(`🚀 CEK DULU — BENCHMARK RUNNER [MODE: ${MODE.toUpperCase()}]`);
   console.log('='.repeat(75));
   console.log(`Execution Mode   : ${MODE}`);
   console.log(`Target Endpoint  : ${MODE === 'fallback-only' ? 'LOCAL FUNCTION (No HTTP)' : ENDPOINT}`);
@@ -549,7 +549,7 @@ async function main() {
       console.log(`Target Health Status: ${JSON.stringify(healthRes)}`);
     } catch (err: any) {
       console.error(`⚠️ Server target di ${BASE_URL} tidak merespons: ${err.message}`);
-      console.error('Pastikan server ScamAware berjalan ("npm run dev") sebelum pengujian.');
+      console.error('Pastikan server Cek Dulu berjalan ("npm run dev") sebelum pengujian.');
       process.exit(1);
     }
   }

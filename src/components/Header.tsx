@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                  ScamAware<span className="text-cyan-400">AI</span>
+                  Cek <span className="text-cyan-400">Dulu</span>
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30">
                   Anti-Scam Lab

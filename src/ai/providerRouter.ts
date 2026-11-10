@@ -254,7 +254,7 @@ export class ProviderRouter {
       scammerIntent: 'Belum dapat dipastikan dari gambar saja',
       psychologicalTriggers: [],
       actionRecommendations: [
-        'Ketikkan isi teks pesan secara manual ke ScamAware AI',
+        'Ketikkan isi teks pesan secara manual ke Cek Dulu',
         'Jangan mengklik tautan atau menginstal berkas sebelum diverifikasi',
         'Pastikan gambar memiliki resolusi jelas dan format standar (PNG/JPEG)',
       ],
@@ -287,7 +287,7 @@ export class ProviderRouter {
     let summary = fallbackResult.summary;
     let riskLevel = fallbackResult.riskLevel;
     let riskScore = fallbackResult.riskScore;
-    let note = 'Dianalisis menggunakan sistem deteksi pola lokal ScamAware.';
+    let note = 'Dianalisis menggunakan sistem deteksi pola lokal Cek Dulu.';
     let warnings: string[] | undefined = undefined;
 
     if (hasImage) {

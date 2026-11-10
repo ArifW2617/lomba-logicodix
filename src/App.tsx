@@ -17,7 +17,7 @@ export default function App() {
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [quizScore, setQuizScore] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('scamaware_xp');
+      const saved = localStorage.getItem('cekdulu_xp') || localStorage.getItem('scamaware_xp');
       return saved ? parseInt(saved, 10) : 100;
     } catch {
       return 100;
@@ -28,7 +28,7 @@ export default function App() {
     setQuizScore((prev) => {
       const updated = prev + points;
       try {
-        localStorage.setItem('scamaware_xp', updated.toString());
+        localStorage.setItem('cekdulu_xp', updated.toString());
       } catch {
         // ignore
       }
@@ -79,9 +79,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-cyan-400 font-bold text-xs">
-              S
+              C
             </div>
-            <span className="font-bold text-slate-200">ScamAware AI</span>
+            <span className="font-bold text-slate-200">Cek Dulu</span>
             <span className="text-slate-600">•</span>
             <span>Platform Edukasi Anti-Penipuan Berbasis AI</span>
           </div>

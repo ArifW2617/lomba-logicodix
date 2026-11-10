@@ -48,7 +48,7 @@ export class OpenRouterProvider implements AIProvider {
     let lastError: any = null;
     const cleanMessage = input.message?.trim() || '';
 
-    const systemInstruction = `Anda adalah mesin analisis penipuan siber (ScamAware AI) untuk masyarakat Indonesia.
+    const systemInstruction = `Anda adalah mesin analisis penipuan siber (Cek Dulu) untuk masyarakat Indonesia.
 Tugas Anda adalah mendeteksi kejahatan digital seperti modus APK kurir/undangan, phishing perbankan, penipuan lowongan kerja online, pinjol ilegal, dan undian palsu.
 
 WAJIB menghasilkan format JSON murni yang valid tanpa awalan atau akhiran teks Markdown:
@@ -91,7 +91,7 @@ ${input.context.trim()}
 `;
     }
 
-    userPrompt += '\nKeluarkan respons dalam format JSON sesuai skema ScamAware.';
+    userPrompt += '\nKeluarkan respons dalam format JSON sesuai skema Cek Dulu.';
 
     for (const model of modelsToTry) {
       if (options?.signal?.aborted) {
@@ -119,7 +119,7 @@ ${input.context.trim()}
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
-            'X-Title': process.env.OPENROUTER_APP_NAME || 'ScamAware AI',
+            'X-Title': process.env.OPENROUTER_APP_NAME || 'Cek Dulu',
           },
           body: JSON.stringify(payload),
           signal: options?.signal,

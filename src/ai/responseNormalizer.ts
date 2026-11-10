@@ -37,7 +37,7 @@ export function normalizeProviderResponse(
     }
   }
 
-  // 2. Validate against ScamAware schema
+  // 2. Validate against Cek Dulu schema
   const validation = validateAnalysisOutput(parsedObject);
   if (!validation.valid) {
     throw new Error(`INVALID_OUTPUT: Validasi schema gagal untuk ${metadata.provider}: ${validation.errors.join('; ')}`);

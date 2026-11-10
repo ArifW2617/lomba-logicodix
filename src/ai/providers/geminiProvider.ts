@@ -47,12 +47,12 @@ export class GeminiProvider implements AIProvider {
       : [];
 
     const defaultCascade = [
-      'gemini-3.8-flash',
-      'gemini-3.5-flash',
       'gemini-2.5-flash',
       'gemini-2.5-flash-lite',
       'gemini-flash-lite-latest',
       'gemini-3-flash-preview',
+      'gemini-3.8-flash',
+      'gemini-3.5-flash',
     ];
 
     return [...envModels, ...defaultCascade].filter((v, i, a) => a.indexOf(v) === i);
@@ -77,9 +77,9 @@ export class GeminiProvider implements AIProvider {
     const cleanMessage = hasMessage ? input.message!.trim() : '';
 
     const systemInstruction =
-      'Anda adalah mesin analisis penipuan siber tingkat lanjut (ScamAware AI) untuk mendidik masyarakat Indonesia melawan kejahatan digital (seperti modus file APK kurir/undangan/tilang ETLE, phising perbankan, lowongan freelance tugas like video, pinjol ilegal, quishing QRIS palsu, dan undian fiktif). Lakukan OCR untuk membaca seluruh teks pada gambar bila ada gambar yang dikirimkan, periksa elemen visual (misalnya icon file .apk, logo bank tiruan, nomor WhatsApp asing, status pesan, QRIS), dan berikan evaluasi risiko yang sangat akurat, terstruktur, serta edukatif dalam Bahasa Indonesia.';
+      'Anda adalah mesin analisis penipuan siber tingkat lanjut (Cek Dulu) untuk mendidik masyarakat Indonesia melawan kejahatan digital (seperti modus file APK kurir/undangan/tilang ETLE, phising perbankan, lowongan freelance tugas like video, pinjol ilegal, quishing QRIS palsu, dan undian fiktif). Lakukan OCR untuk membaca seluruh teks pada gambar bila ada gambar yang dikirimkan, periksa elemen visual (misalnya icon file .apk, logo bank tiruan, nomor WhatsApp asing, status pesan, QRIS), dan berikan evaluasi risiko yang sangat akurat, terstruktur, serta edukatif dalam Bahasa Indonesia.';
 
-    let prompt = `Anda adalah asisten pakar keamanan siber dan anti-penipuan digital (ScamAware AI).
+    let prompt = `Anda adalah asisten pakar keamanan siber dan anti-penipuan digital (Cek Dulu).
 Tugas Anda adalah menganalisis pesan, tangkapan layar (screenshot chat WA/SMS/email/sosmed), tautan, atau penawaran yang diterima pengguna di Indonesia.
 `;
 

@@ -316,7 +316,7 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = ({ onGoToSimulation }) 
 
   const handleCopyAnalysis = () => {
     if (!result) return;
-    const textToCopy = `[Analisis ScamAware AI]\nKategori: ${result.category}\nTingkat Risiko: ${result.riskLevel.toUpperCase()} (Skor: ${result.riskScore}/100)\n\nRingkasan: ${result.summary}\n\nTujuan Pelaku: ${result.scammerIntent}\n\nRekomendasi:\n${result.actionRecommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
+    const textToCopy = `[Analisis Cek Dulu]\nKategori: ${result.category}\nTingkat Risiko: ${result.riskLevel.toUpperCase()} (Skor: ${result.riskScore}/100)\n\nRingkasan: ${result.summary}\n\nTujuan Pelaku: ${result.scammerIntent}\n\nRekomendasi:\n${result.actionRecommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -400,7 +400,7 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = ({ onGoToSimulation }) 
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base leading-relaxed">
             Dapatkan deteksi instan terhadap modus APK kurir, phishing perbankan, tilang ETLE palsu, dan undian fiktif.
-            Tempel teks pesan atau <strong>unggah tangkapan layar (screenshot WhatsApp/SMS)</strong> langsung ke ScamAware AI.
+            Tempel teks pesan atau <strong>unggah tangkapan layar (screenshot WhatsApp/SMS)</strong> langsung ke Cek Dulu.
           </p>
         </div>
       </div>
@@ -618,7 +618,7 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = ({ onGoToSimulation }) 
                 ) : (
                   <>
                     <BrainCircuit className="w-4 h-4" />
-                    <span>Analisis dengan ScamAware AI</span>
+                    <span>Analisis dengan Cek Dulu</span>
                   </>
                 )}
               </button>

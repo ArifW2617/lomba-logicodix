@@ -1,4 +1,4 @@
-# ScamAware AI — Smart & Fun Anti-Scam Platform
+# Cek Dulu — Smart & Fun Anti-Scam Platform
 
 Aplikasi edukasi dan analisis ancaman penipuan digital interaktif berbasis Multi-Provider AI untuk masyarakat Indonesia.
 

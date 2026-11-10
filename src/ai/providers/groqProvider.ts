@@ -47,7 +47,7 @@ export class GroqProvider implements AIProvider {
     let lastError: any = null;
     const cleanMessage = input.message?.trim() || '';
 
-    const systemInstruction = `Anda adalah mesin analisis penipuan siber (ScamAware AI) untuk masyarakat Indonesia.
+    const systemInstruction = `Anda adalah mesin analisis penipuan siber (Cek Dulu) untuk masyarakat Indonesia.
 Tugas Anda adalah menganalisis pesan teks, SMS, WhatsApp, atau penawaran digital untuk mendeteksi penipuan online (seperti kurir APK, phising bank, kerja paruh waktu like video, pinjol ilegal, undian palsu).
 
 Anda WAJIB menghasilkan format JSON valid dan terstruktur tanpa teks pembuka/penutup lain.
@@ -91,7 +91,7 @@ ${input.context.trim()}
 `;
     }
 
-    userPrompt += '\nKeluarkan respons dalam format JSON sesuai skema ScamAware.';
+    userPrompt += '\nKeluarkan respons dalam format JSON sesuai skema Cek Dulu.';
 
     for (const model of modelsToTry) {
       if (options?.signal?.aborted) {

@@ -1,5 +1,5 @@
 {
-  "name": "ScamAware AI - Platform Edukasi Anti-Penipuan Berbasis AI",
+  "name": "Cek Dulu - Platform Edukasi Anti-Penipuan Berbasis AI",
   "description": "Platform edukasi interaktif anti-penipuan digital dengan asisten deteksi scam berbasis AI, simulasi kasus percakapan realistis, kuis edukatif interaktif, dan panduan mitigasi keamanan.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
