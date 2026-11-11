@@ -33,6 +33,8 @@ export interface AnalysisResult {
   latencyMs?: number;
   warnings?: string[];
   note?: string;
+  fallback?: boolean;
+  fallbackImageMode?: boolean;
 }
 
 export interface SimulationChoice {

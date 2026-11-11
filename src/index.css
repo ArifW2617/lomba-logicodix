@@ -614,12 +614,45 @@ footer.app-footer .wrap {
 }
 
 .help-dialog h2 {
-  margin: 0 0 6px;
+  margin: 0 0 16px;
   font-size: 22px;
   color: var(--ink);
 }
 
-.help-dialog ol {
+/* Numbered steps list */
+ol.em-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+ol.em-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 15.5px;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.em-num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 800;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+
+/* Fallback: old ol inside help-dialog (contacts accordion etc) */
+.help-dialog ol:not(.em-steps) {
   padding-left: 20px;
   display: grid;
   gap: 10px;
@@ -1455,15 +1488,81 @@ footer.app-footer .wrap {
   margin-top: 22px;
 }
 .late h4 {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   color: var(--bad);
 }
-.late ul {
+
+/* Modal numbered steps */
+ol.db-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+ol.db-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15.5px;
+  color: var(--ink);
+  line-height: 1.55;
+}
+.db-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+ol.late-steps li {
   color: var(--ink);
 }
-.late li::marker {
-  color: var(--bad);
+.late-num {
+  background: var(--bad) !important;
+  color: #fff !important;
 }
+
+/* Modal icon bullets */
+ul.db-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+ul.db-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15.5px;
+  color: var(--ink);
+  line-height: 1.55;
+}
+.db-dot {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.db-dot.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
 @media (max-width: 640px) {
   .dh,
   .db {
@@ -1471,6 +1570,128 @@ footer.app-footer .wrap {
     padding-right: 18px;
   }
 }
+
+/* ── Cadangan AI, bagikan, laporan, aksesibilitas ── */
+html { --cd-z: 1; }
+.cd-fallback {
+  background: var(--warn-s);
+  color: var(--warn);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.cd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.cd-btn {
+  font-family: inherit;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  min-height: 44px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cd-btn:hover { border-color: var(--brand); background: var(--soft); }
+.cd-btn.cd-primary {
+  background: var(--brand);
+  color: var(--on);
+  border-color: var(--brand);
+}
+.cd-btn.cd-primary:hover { filter: brightness(1.08); }
+
+/* Floating Aa button */
+#cd-a11y-btn {
+  position: fixed;
+  z-index: 60;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  font-family: inherit;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--brand);
+  color: var(--on);
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+#cd-a11y-btn:hover { filter: brightness(1.1); }
+
+/* A11y dialog panel */
+#cd-a11y {
+  position: fixed;
+  z-index: 61;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  width: min(320px, calc(100vw - 32px));
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.3);
+  display: grid;
+  gap: 12px;
+}
+#cd-a11y h2 { margin: 0; font-size: 18px; }
+#cd-a11y .cd-l { margin: 0; font-size: 14px; color: var(--muted); font-weight: 600; }
+#cd-a11y .cd-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+#cd-a11y button {
+  font-family: inherit;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.15s;
+}
+#cd-a11y button[aria-pressed="true"] { background: var(--brand); color: var(--on); border-color: var(--brand); }
+/* Toggle switch */
+#cd-a11y .cd-sw { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; text-align: left; }
+#cd-a11y .cd-sw i { width: 42px; height: 24px; border-radius: 99px; background: var(--line); position: relative; flex: none; }
+#cd-a11y .cd-sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); transition: transform .2s; }
+#cd-a11y .cd-sw[aria-checked="true"] i { background: var(--brand); }
+#cd-a11y .cd-sw[aria-checked="true"] i::after { transform: translateX(18px); }
+#cd-a11y .cd-wide { width: 100%; }
+
+/* High-contrast override */
+html.cd-hc {
+  --bg: #fff; --surface: #fff; --ink: #000; --muted: #1c2a29;
+  --line: #2b3d3b; --brand: #00514a; --brand-ink: #fff; --brand-soft: #d6ece8;
+  --soft: #d6ece8; --on: #fff; --danger: #8f0f08; --danger-soft: #ffe3e1;
+  --bad: #8f0f08; --bad-s: #ffe3e1; --warn: #5c3b00; --warn-soft: #ffecb8;
+  --warn-s: #ffecb8; --ok: #0b4d26; --ok-soft: #d3f1de; --ok-s: #d3f1de;
+  --me: #00514a; --chat: #eef2f1; color-scheme: light;
+}
+html.cd-hc .card, html.cd-hc .case, html.cd-hc .opt, html.cd-hc .mc,
+html.cd-hc .chip, html.cd-hc textarea, html.cd-hc input { border-width: 2px !important; border-color: var(--ink); }
+html.cd-hc a { text-decoration: underline; }
+html.cd-hc :focus-visible { outline: 4px solid #000; outline-offset: 3px; }
+
+@media print { #cd-a11y-btn, #cd-a11y { display: none; } }
 
 /* URL Inspector Redesign */
 .url-top {

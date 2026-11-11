@@ -352,33 +352,45 @@ export const EducationTab: React.FC = () => {
               <p>{selectedModus.d}</p>
 
               <h4>Bagaimana cara kerjanya</h4>
-              <ol>
+              <ol className="db-steps">
                 {selectedModus.how.map((step, i) => (
-                  <li key={i}>{step}</li>
+                  <li key={i}>
+                    <span className="db-num">{i + 1}</span>
+                    <span>{step}</span>
+                  </li>
                 ))}
               </ol>
 
               <h4>Tanda-tandanya</h4>
-              <ul>
+              <ul className="db-bullets">
                 {selectedModus.sign.map((s, i) => (
-                  <li key={i}>{s}</li>
+                  <li key={i}>
+                    <span className="db-dot" aria-hidden="true">⚠</span>
+                    <span>{s}</span>
+                  </li>
                 ))}
               </ul>
 
               <h4>Cara melindungi diri</h4>
-              <ul>
+              <ul className="db-bullets">
                 {selectedModus.safe.map((s, i) => (
-                  <li key={i}>{s}</li>
+                  <li key={i}>
+                    <span className="db-dot ok" aria-hidden="true">✓</span>
+                    <span>{s}</span>
+                  </li>
                 ))}
               </ul>
 
               <div className="late">
                 <h4>Jika sudah terlanjur</h4>
-                <ul>
+                <ol className="db-steps late-steps">
                   {selectedModus.late.map((s, i) => (
-                    <li key={i}>{s}</li>
+                    <li key={i}>
+                      <span className="db-num late-num">{i + 1}</span>
+                      <span>{s}</span>
+                    </li>
                   ))}
-                </ul>
+                </ol>
               </div>
             </div>
           </div>

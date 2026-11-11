@@ -7,6 +7,13 @@ interface EmergencyModalProps {
   onClose: () => void;
 }
 
+const STEPS = [
+  'Telepon bank Anda lewat nomor di belakang kartu, minta blokir rekening atau kartu.',
+  'Lepas jaringan data dan hapus aplikasi .APK yang baru terpasang.',
+  'Ganti kata sandi email, m-banking, dan media sosial dari perangkat lain.',
+  'Lapor ke OJK di 157 dan cek rekening penipu di cekrekening.id.',
+];
+
 export const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose }) => {
   const [copiedNumber, setCopiedNumber] = useState<string | null>(null);
 
@@ -28,11 +35,13 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose 
     >
       <div className="help-dialog max-h-[90vh] overflow-y-auto">
         <h2 id="hh">Sudah terlanjur? Lakukan ini sekarang</h2>
-        <ol>
-          <li>Telepon bank Anda lewat nomor di belakang kartu, minta blokir rekening atau kartu.</li>
-          <li>Lepas jaringan data dan hapus aplikasi .APK yang baru terpasang.</li>
-          <li>Ganti kata sandi email, m-banking, dan media sosial dari perangkat lain.</li>
-          <li>Lapor ke OJK di 157 dan cek rekening penipu di cekrekening.id.</li>
+        <ol className="em-steps">
+          {STEPS.map((step, idx) => (
+            <li key={idx}>
+              <span className="em-num">{idx + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
         </ol>
 
         {/* Quick contacts grid */}
