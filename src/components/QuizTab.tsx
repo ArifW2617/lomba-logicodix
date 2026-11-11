@@ -1,340 +1,408 @@
 import React, { useState } from 'react';
-import {
-  CheckCircle2,
-  XCircle,
-  Award,
-  RotateCcw,
-  ArrowRight,
-  Flame,
-  Lightbulb,
-} from 'lucide-react';
-import { QUIZ_QUESTIONS } from '../data/scamData';
-import { QuizQuestion } from '../types';
 
-interface QuizTabProps {
+export interface QuizTabProps {
   score: number;
   onAddScore: (points: number) => void;
 }
 
-export const QuizTab: React.FC<QuizTabProps> = ({ score, onAddScore }) => {
-  const [activeCategory, setActiveCategory] = useState<'Semua' | 'Pemula' | 'Menengah' | 'Mahir'>('Semua');
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+interface QuestionItem {
+  l: 'Pemula' | 'Menengah' | 'Mahir';
+  q: string;
+  e?: [string, string];
+  o: string[];
+  a: number;
+  x: string;
+}
+
+const QUESTIONS: QuestionItem[] = [
+  {
+    l: 'Pemula',
+    q: 'Anda menerima pesan WhatsApp dari nomor asing: “Paket tertahan, mohon verifikasi foto resi.” Apa arti ekstensi .apk pada berkas ini?',
+    e: ['Foto_Paket_JNE_2026.apk', '4,5 MB · dikirim dari nomor tidak dikenal'],
+    o: [
+      'Foto resmi berkualitas tinggi dari kurir',
+      'Aplikasi Android yang bisa berisi program pencuri SMS dan data ponsel',
+      'Dokumen teks berisi rincian ongkos kirim',
+      'Sertifikat tanda tangan elektronik dari kurir',
+    ],
+    a: 1,
+    x: 'Berkas .apk adalah aplikasi. Foto asli berakhiran .jpg atau .png. Aplikasi dari chat bisa membaca OTP dan mengambil alih m-banking.',
+  },
+  {
+    l: 'Pemula',
+    q: 'Seseorang yang mengaku dari bank menelepon dan meminta kode OTP agar “akun Anda aman”. Apa yang sebaiknya Anda lakukan?',
+    o: [
+      'Memberikan kode karena ia dari bank',
+      'Menutup telepon, lalu menghubungi nomor resmi di belakang kartu',
+      'Memberikan setengah kode saja',
+      'Meminta ia menyebut saldo Anda dulu',
+    ],
+    a: 1,
+    x: 'Bank asli tidak pernah meminta OTP. Penelepon bisa saja sudah tahu nama dan saldo Anda dari data bocor, jadi itu bukan bukti.',
+  },
+  {
+    l: 'Pemula',
+    q: 'Anda tiba-tiba “memenangkan” undian Rp50 juta, padahal tidak pernah ikut undian apa pun. Apa kemungkinan terbesarnya?',
+    o: [
+      'Rezeki yang memang harus diklaim cepat',
+      'Penipuan untuk mencuri data atau uang Anda',
+      'Kesalahan kirim dari penyelenggara',
+      'Hadiah dari bank tempat Anda menabung',
+    ],
+    a: 1,
+    x: 'Undian yang tidak pernah Anda ikuti pasti palsu. Penipu memakai hadiah besar agar Anda lupa berpikir.',
+  },
+  {
+    l: 'Menengah',
+    q: 'Mana tautan yang paling mungkin merupakan situs asli Bank BRI?',
+    o: [
+      'bri-co-id.xyz/login',
+      'brii-online.com',
+      'bri.co.id',
+      'bri.promo-hadiah.top',
+    ],
+    a: 2,
+    x: 'Periksa nama domain utama, yaitu bagian tepat sebelum akhiran seperti .co.id. Tiga pilihan lain meniru nama BRI tetapi milik pihak lain.',
+  },
+  {
+    l: 'Menengah',
+    q: 'Sebuah pinjol ilegal mengancam akan menyebar foto KTP Anda ke semua kontak. Apa langkah pertama yang tepat?',
+    o: [
+      'Segera transfer agar data tidak tersebar',
+      'Pinjam dari aplikasi lain untuk melunasi',
+      'Simpan bukti pesan, jangan bayar ke rekening pribadi, dan lapor OJK di 157',
+      'Hapus semua kontak di ponsel',
+    ],
+    a: 2,
+    x: 'Pembayaran tidak menghentikan teror, tagihan malah bertambah. Bukti pesan penting untuk laporan.',
+  },
+  {
+    l: 'Menengah',
+    q: 'Anda hendak membayar infak lewat QRIS stiker di kotak donasi. Apa yang perlu dicek sebelum menekan bayar?',
+    o: [
+      'Warna stiker QRIS-nya',
+      'Nama penerima di layar sama dengan nama lembaganya',
+      'Jumlah orang yang ada di sekitar',
+      'Tidak perlu, QRIS pasti aman',
+    ],
+    a: 1,
+    x: 'Stiker QRIS bisa ditempel di atas yang asli. Nama penerima yang muncul di aplikasi adalah satu-satunya petunjuk.',
+  },
+  {
+    l: 'Mahir',
+    q: 'Ibu menerima telepon bersuara persis seperti anaknya, menangis dan meminta transfer darurat. Cara terbaik memastikan kebenarannya?',
+    o: [
+      'Percaya, karena suaranya sama persis',
+      'Menanyakan ia ada di mana sekarang',
+      'Menutup telepon dan menghubungi anak lewat nomor yang biasa, atau menanyakan kata sandi keluarga',
+      'Mentransfer sedikit dulu sebagai tanda bantuan',
+    ],
+    a: 2,
+    x: 'Suara kini bisa ditiru AI dari video yang diunggah ke media sosial. Sepakati kata sandi keluarga yang hanya diketahui anggota keluarga.',
+  },
+  {
+    l: 'Mahir',
+    q: 'Setelah tiga tugas “like video” dibayar, admin meminta deposit untuk “tugas premium” dengan komisi lebih besar. Ini pola apa?',
+    o: [
+      'Kenaikan jenjang karier yang wajar',
+      'Penipuan umpan: dibayar kecil dulu, lalu diminta deposit besar',
+      'Promosi resmi platform video',
+      'Sistem pajak penghasilan',
+    ],
+    a: 1,
+    x: 'Bayaran awal hanya untuk membangun kepercayaan. Pekerjaan sungguhan tidak meminta Anda menyetor uang lebih dulu.',
+  },
+];
+
+const KEYS = ['A', 'B', 'C', 'D'];
+
+export const QuizTab: React.FC<QuizTabProps> = ({ score: externalScore, onAddScore }) => {
+  const [level, setLevel] = useState<'Semua' | 'Pemula' | 'Menengah' | 'Mahir'>('Semua');
+  const [index, setIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [points, setPoints] = useState(externalScore || 0);
+  const [missedQuestions, setMissedQuestions] = useState<QuestionItem[]>([]);
   const [isFinished, setIsFinished] = useState(false);
 
-  const filteredQuestions: QuizQuestion[] = activeCategory === 'Semua'
-    ? QUIZ_QUESTIONS
-    : QUIZ_QUESTIONS.filter((q) => q.category === activeCategory);
+  const filteredQuestions =
+    level === 'Semua' ? QUESTIONS : QUESTIONS.filter((q) => q.l === level);
 
-  const currentQuestion = filteredQuestions[currentIndex] || filteredQuestions[0];
+  const currentQ = filteredQuestions[index] || filteredQuestions[0];
 
-  const handleSelect = (index: number) => {
-    if (isSubmitted) return;
-    setSelectedOption(index);
+  const resetQuiz = (newLevel: 'Semua' | 'Pemula' | 'Menengah' | 'Mahir' = level) => {
+    setLevel(newLevel);
+    setIndex(0);
+    setSelected(null);
+    setIsAnswered(false);
+    setCorrectCount(0);
+    setStreak(0);
+    setMissedQuestions([]);
+    setIsFinished(false);
   };
 
-  const handleSubmit = () => {
-    if (selectedOption === null || isSubmitted) return;
-    setIsSubmitted(true);
+  const handleSelectOption = (optIndex: number) => {
+    if (isAnswered) return;
+    setSelected(optIndex);
+  };
 
-    const isCorrect = selectedOption === currentQuestion.correctAnswer;
-    if (isCorrect) {
+  const handleCheckAnswer = () => {
+    if (selected === null || isAnswered) return;
+
+    const isOk = selected === currentQ.a;
+    setIsAnswered(true);
+
+    if (isOk) {
+      const earned = 10 + (streak >= 2 ? 5 : 0);
+      setCorrectCount((prev) => prev + 1);
       setStreak((prev) => prev + 1);
-      setCorrectAnswersCount((prev) => prev + 1);
-      onAddScore(20 + streak * 5);
+      setPoints((prev) => prev + earned);
+      onAddScore(earned);
     } else {
       setStreak(0);
+      setMissedQuestions((prev) => [...prev, currentQ]);
     }
   };
 
-  const handleNext = () => {
-    if (currentIndex + 1 < filteredQuestions.length) {
-      setCurrentIndex((prev) => prev + 1);
-      setSelectedOption(null);
-      setIsSubmitted(false);
+  const handleNextQuestion = () => {
+    if (index + 1 < filteredQuestions.length) {
+      setIndex((prev) => prev + 1);
+      setSelected(null);
+      setIsAnswered(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setIsFinished(true);
     }
   };
 
-  const handleRestart = (category: 'Semua' | 'Pemula' | 'Menengah' | 'Mahir' = activeCategory) => {
-    setActiveCategory(category);
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsSubmitted(false);
-    setCorrectAnswersCount(0);
-    setStreak(0);
-    setIsFinished(false);
+  const getEndMessage = () => {
+    const ratio = correctCount / filteredQuestions.length;
+    if (ratio >= 0.8) {
+      return [
+        'Sangat waspada',
+        'Anda sulit dikelabui. Bagikan ilmu ini ke keluarga.',
+      ];
+    }
+    if (ratio >= 0.5) {
+      return [
+        'Cukup waspada',
+        'Sebagian besar sudah tepat. Pelajari lagi yang meleset di bawah.',
+      ];
+    }
+    return [
+      'Perlu lebih berhati-hati',
+      'Tidak apa-apa, di sinilah tempat belajarnya. Coba ulangi kuisnya.',
+    ];
   };
 
-  const getBadgeRank = () => {
-    const accuracy = filteredQuestions.length > 0 ? (correctAnswersCount / filteredQuestions.length) * 100 : 0;
-    if (accuracy >= 85) return { title: 'Master Anti-Scam Siber', color: 'var(--brand)', desc: 'Luar biasa! Naluri keamanan digital Anda setara analis keamanan siber.' };
-    if (accuracy >= 60) return { title: 'Penjaga Privasi Waspada', color: 'var(--ok)', desc: 'Bagus! Anda memahami sebagian besar taktik penipuan digital terkini.' };
-    return { title: 'Detektif Pemula', color: 'var(--warn)', desc: 'Perbanyak latihan dan pelajari ensiklopedia modus agar tidak mudah terperdaya.' };
+  const levelCounts: Record<'Semua' | 'Pemula' | 'Menengah' | 'Mahir', number> = {
+    Semua: QUESTIONS.length,
+    Pemula: QUESTIONS.filter((q) => q.l === 'Pemula').length,
+    Menengah: QUESTIONS.filter((q) => q.l === 'Menengah').length,
+    Mahir: QUESTIONS.filter((q) => q.l === 'Mahir').length,
   };
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
-      {/* Quiz Top Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '20px' }}>
+    <>
+      {/* Top Header & Streak/Point Stats */}
+      <div className="quiz-top">
         <div>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '4px 12px',
-              borderRadius: '999px',
-              background: 'var(--brand-soft)',
-              color: 'var(--brand)',
-              fontSize: '13px',
-              fontWeight: 600,
-              marginBottom: '8px',
-            }}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Kuis Pemahaman Anti-Penipuan Digital
-          </div>
-          <h1 className="hero-h1" style={{ fontSize: '28px', margin: '0 0 6px' }}>
-            Uji Pengetahuan & Deteksi Celah Penipuan
-          </h1>
-          <p className="lead" style={{ margin: 0 }}>
-            Jawab pertanyaan studi kasus nyata mengenai modus APK, domain tiruan, rekayasa sosial, dan perlindungan data pribadi.
+          <h1>Kuis: seberapa waspada Anda?</h1>
+          <p className="lead">
+            Jawab pertanyaan dari kasus penipuan yang benar-benar terjadi. Tiap jawaban
+            dijelaskan, jadi Anda belajar sambil bermain.
           </p>
         </div>
-
-        {/* Stats Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Flame className="w-4 h-4" style={{ color: 'var(--warn)' }} />
-            <div style={{ fontSize: '13px' }}>
-              <span style={{ color: 'var(--muted)' }}>Streak:</span>{' '}
-              <strong style={{ color: 'var(--warn)' }}>{streak}x</strong>
-            </div>
+        <div className="stats">
+          <div className="stat">
+            <small>Benar beruntun</small>
+            <b>{streak}</b>
           </div>
-          <div className="card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--brand-soft)', borderColor: 'var(--brand)' }}>
-            <Award className="w-4 h-4" style={{ color: 'var(--brand)' }} />
-            <div style={{ fontSize: '13px' }}>
-              <span style={{ color: 'var(--muted)' }}>Poin:</span>{' '}
-              <strong style={{ color: 'var(--brand)' }}>{score} XP</strong>
-            </div>
+          <div className="stat">
+            <small>Poin</small>
+            <b>{points}</b>
           </div>
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="chips" style={{ borderBottom: '1px solid var(--line)', paddingBottom: '14px' }}>
-        {(['Semua', 'Pemula', 'Menengah', 'Mahir'] as const).map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => handleRestart(cat)}
-            className="chip"
-            style={{
-              background: activeCategory === cat ? 'var(--brand)' : 'var(--surface)',
-              color: activeCategory === cat ? 'var(--brand-ink)' : 'var(--ink)',
-              borderColor: activeCategory === cat ? 'var(--brand)' : 'var(--line)',
-            }}
-          >
-            {cat} {cat === 'Semua' ? `(${QUIZ_QUESTIONS.length})` : ''}
-          </button>
-        ))}
-      </div>
-
-      {!isFinished && currentQuestion ? (
-        <div style={{ maxWidth: '780px', margin: '0 auto', width: '100%', display: 'grid', gap: '18px' }}>
-          {/* Progress bar */}
-          <div style={{ display: 'grid', gap: '6px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>
-              <span>
-                Pertanyaan {currentIndex + 1} dari {filteredQuestions.length}
-              </span>
-              <span style={{ color: 'var(--brand)' }}>Tingkat: {currentQuestion.category}</span>
-            </div>
-            <div className="meter" style={{ margin: 0 }}>
-              <i style={{ width: `${((currentIndex + 1) / filteredQuestions.length) * 100}%`, background: 'var(--brand)' }} />
-            </div>
-          </div>
-
-          <div className="card" style={{ display: 'grid', gap: '18px', padding: '28px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)', margin: 0, lineHeight: 1.5 }}>
-              {currentQuestion.question}
-            </h2>
-
-            {/* Optional Scenario Snippet */}
-            {currentQuestion.scenarioSnippet && (
-              <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'var(--warn-soft)', border: '1px solid var(--warn)', color: 'var(--warn)', fontFamily: 'monospace', fontSize: '13px' }}>
-                🔍 {currentQuestion.scenarioSnippet}
-              </div>
-            )}
-
-            {/* Options List */}
-            <div style={{ display: 'grid', gap: '10px' }}>
-              {currentQuestion.options.map((option, idx) => {
-                const isSelected = selectedOption === idx;
-                const isCorrect = idx === currentQuestion.correctAnswer;
-
-                let bg = 'var(--surface)';
-                let border = 'var(--line)';
-                let color = 'var(--ink)';
-
-                if (isSubmitted) {
-                  if (isCorrect) {
-                    bg = 'var(--ok-soft)';
-                    border = 'var(--ok)';
-                    color = 'var(--ok)';
-                  } else if (isSelected) {
-                    bg = 'var(--danger-soft)';
-                    border = 'var(--danger)';
-                    color = 'var(--danger)';
-                  } else {
-                    bg = 'var(--bg)';
-                    color = 'var(--muted)';
-                  }
-                } else if (isSelected) {
-                  bg = 'var(--brand-soft)';
-                  border = 'var(--brand)';
-                  color = 'var(--brand)';
-                }
-
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleSelect(idx)}
-                    disabled={isSubmitted}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '14px 16px',
-                      borderRadius: '12px',
-                      border: `1.5px solid ${border}`,
-                      background: bg,
-                      color: color,
-                      fontSize: '15px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '26px', height: '26px', borderRadius: '999px', background: 'var(--bg)', border: '1px solid var(--line)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
-                        {String.fromCharCode(65 + idx)}
-                      </span>
-                      <span>{option}</span>
-                    </div>
-
-                    {isSubmitted && isCorrect && <CheckCircle2 className="w-5 h-5 flex-shrink-0" />}
-                    {isSubmitted && isSelected && !isCorrect && <XCircle className="w-5 h-5 flex-shrink-0" />}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Submit or Next Button */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
-              {!isSubmitted ? (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={selectedOption === null}
-                  className="cta"
-                >
-                  Kunci Jawaban
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="cta"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                >
-                  <span>
-                    {currentIndex + 1 === filteredQuestions.length ? 'Lihat Hasil Akhir' : 'Pertanyaan Berikutnya'}
-                  </span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Explanation Box */}
-            {isSubmitted && (
-              <div style={{ padding: '16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--line)', fontSize: '14px', color: 'var(--ink)', display: 'grid', gap: '8px' }}>
-                <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {selectedOption === currentQuestion.correctAnswer ? (
-                    <span style={{ color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <CheckCircle2 className="w-4 h-4" /> Jawaban Benar (+20 XP)
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <XCircle className="w-4 h-4" /> Jawaban Salah
-                    </span>
-                  )}
-                </div>
-                <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.5 }}>{currentQuestion.explanation}</p>
-                <div style={{ paddingTop: '8px', borderTop: '1px solid var(--line)', color: 'var(--warn)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Lightbulb className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    <b>Tips Ahli:</b> {currentQuestion.proTip}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        /* Victory Card */
-        <div className="card" style={{ maxWidth: '580px', margin: '0 auto', textAlign: 'center', padding: '36px', display: 'grid', gap: '20px', width: '100%' }}>
-          <div style={{ width: '70px', height: '70px', borderRadius: '999px', background: 'var(--brand-soft)', border: '1px solid var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: 'var(--brand)' }}>
-            <Award className="w-8 h-8" />
-          </div>
-
-          <div>
-            <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--brand)', fontWeight: 800 }}>
-              Kuis Selesai
-            </span>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--ink)', margin: '4px 0 8px' }}>
-              Hasil Evaluasi Kuis Anti-Scam
-            </h2>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: getBadgeRank().color }}>
-              Gelar: {getBadgeRank().title}
-            </div>
-            <p style={{ fontSize: '14px', color: 'var(--muted)', margin: '4px 0 0' }}>{getBadgeRank().desc}</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', padding: '16px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-            <div style={{ background: 'var(--bg)', padding: '14px', borderRadius: '10px' }}>
-              <div style={{ fontSize: '13px', color: 'var(--muted)' }}>Skor Akurasi</div>
-              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--ok)', marginTop: '4px' }}>
-                {correctAnswersCount} / {filteredQuestions.length}
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg)', padding: '14px', borderRadius: '10px' }}>
-              <div style={{ fontSize: '13px', color: 'var(--muted)' }}>Total XP Akumulasi</div>
-              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--brand)', marginTop: '4px' }}>
-                {score} XP
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <main className="quiz-container">
+        {/* Level Selector Pills */}
+        <div className="seg" role="group" aria-label="Pilih tingkat">
+          {(['Semua', 'Pemula', 'Menengah', 'Mahir'] as const).map((lvl) => (
             <button
+              key={lvl}
               type="button"
-              onClick={() => handleRestart('Semua')}
-              className="cta"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              aria-pressed={level === lvl}
+              onClick={() => resetQuiz(lvl)}
             >
-              <RotateCcw className="w-4 h-4" /> Ulangi Kuis
+              {lvl} ({levelCounts[lvl]})
             </button>
-          </div>
+          ))}
         </div>
-      )}
-    </div>
+
+        {/* Question View or Result View */}
+        {!isFinished && currentQ ? (
+          <div>
+            {/* Meta & Progress bar */}
+            <div className="quiz-meta">
+              <span>
+                Pertanyaan {index + 1} dari {filteredQuestions.length}
+              </span>
+              <b>Tingkat: {currentQ.l}</b>
+            </div>
+
+            <div
+              className="quiz-prog"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={filteredQuestions.length}
+              aria-valuenow={index}
+            >
+              <i style={{ width: `${(index / filteredQuestions.length) * 100}%` }} />
+            </div>
+
+            {/* Question Card */}
+            <div className="quiz-card">
+              <h2>{currentQ.q}</h2>
+
+              {/* Optional Attachment/Evidence box */}
+              {currentQ.e && (
+                <div className="ev">
+                  <span aria-hidden="true">📎</span>
+                  <div>
+                    <b>{currentQ.e[0]}</b>
+                    <small>{currentQ.e[1]}</small>
+                  </div>
+                </div>
+              )}
+
+              {/* Options */}
+              <div className="quiz-opts">
+                {currentQ.o.map((optText, k) => {
+                  const isSelected = selected === k;
+                  const isRight = k === currentQ.a;
+
+                  let optClass = 'quiz-opt';
+                  if (isAnswered) {
+                    if (isRight) optClass += ' right';
+                    else if (isSelected) optClass += ' wrong';
+                  }
+
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      className={optClass}
+                      aria-pressed={isSelected}
+                      disabled={isAnswered}
+                      onClick={() => handleSelectOption(k)}
+                    >
+                      <span className="k">{KEYS[k]}</span>
+                      <span>{optText}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Feedback box */}
+              {isAnswered && (
+                <div
+                  className={`fb ${selected === currentQ.a ? 'good' : 'bad'}`}
+                  aria-live="polite"
+                >
+                  <h3>
+                    {selected === currentQ.a
+                      ? `Benar! ${
+                          streak >= 3
+                            ? '+15 poin, benar beruntun'
+                            : '+10 poin'
+                        }`
+                      : 'Belum tepat'}
+                  </h3>
+                  <p>{currentQ.x}</p>
+                </div>
+              )}
+
+              {/* Card Footer */}
+              <div className="quiz-foot">
+                <span className="quiz-hint">
+                  {!isAnswered && selected === null ? 'Pilih satu jawaban' : ''}
+                </span>
+
+                {!isAnswered ? (
+                  <button
+                    type="button"
+                    className="cta"
+                    disabled={selected === null}
+                    onClick={handleCheckAnswer}
+                  >
+                    Periksa jawaban
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="cta"
+                    onClick={handleNextQuestion}
+                  >
+                    {index + 1 < filteredQuestions.length
+                      ? 'Pertanyaan berikutnya'
+                      : 'Lihat hasil'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* End View */
+          <div>
+            <div className="quiz-prog">
+              <i style={{ width: '100%' }} />
+            </div>
+
+            <div className="quiz-card quiz-end">
+              <div className="quiz-big">
+                {correctCount}/{filteredQuestions.length}
+              </div>
+              <h2>{getEndMessage()[0]}</h2>
+              <p>{getEndMessage()[1]}</p>
+
+              {/* Missed questions recap */}
+              {missedQuestions.length > 0 && (
+                <div className="quiz-miss">
+                  <b>Yang perlu dipelajari lagi:</b>
+                  {missedQuestions.map((m, idx) => (
+                    <div key={idx}>
+                      {m.q}
+                      <small>Jawaban tepat: {m.o[m.a]}</small>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="quiz-acts">
+                <button
+                  type="button"
+                  className="cta"
+                  onClick={() => resetQuiz()}
+                >
+                  Ulangi kuis
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() =>
+                    resetQuiz(level === 'Semua' ? 'Mahir' : 'Semua')
+                  }
+                >
+                  Coba tingkat lain
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </>
   );
 };

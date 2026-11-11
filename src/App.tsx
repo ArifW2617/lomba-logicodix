@@ -61,21 +61,15 @@ export default function App() {
           )}
 
           {activeTab === 'quiz' && (
-            <div className="py-7">
-              <QuizTab score={quizScore} onAddScore={handleAddScore} />
-            </div>
+            <QuizTab score={quizScore} onAddScore={handleAddScore} />
           )}
 
           {activeTab === 'education' && (
-            <div className="py-7">
-              <EducationTab />
-            </div>
+            <EducationTab />
           )}
 
           {activeTab === 'url-scanner' && (
-            <div className="py-7">
-              <UrlInspectorTab />
-            </div>
+            <UrlInspectorTab />
           )}
         </main>
       </div>
