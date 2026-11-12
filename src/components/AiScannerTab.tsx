@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AnalysisResult } from '../types';
+import { speakText } from './A11yPanel';
 
 // ─── 1. Fallback rules (basic analysis when AI is unavailable) ─────────────
 const FALLBACK_RULES: [RegExp, number, string, string][] = [
@@ -48,13 +49,13 @@ function runFallback(message: string, context: string): AnalysisResult {
   };
 }
 
-// ─── 2. Share warning ────────────────────────────────────────────────────────
+// ─── 2. Warning copy ────────────────────────────────────────────────────────
 function truncate(s: string, n: number) {
   s = String(s).replace(/\s+/g, ' ').trim();
   return s.length > n ? s.slice(0, n - 1) + '…' : s;
 }
 
-function shareWarning(level: string, reasons: string[], actions: string[]) {
+function buildWarningText(level: string, reasons: string[], actions: string[]): string {
   const head: Record<string, string> = {
     bad: '⚠️ PERINGATAN: kemungkinan besar penipuan',
     warn: '⚠️ HATI-HATI: ada tanda mencurigakan',
@@ -70,14 +71,12 @@ function shareWarning(level: string, reasons: string[], actions: string[]) {
     actions.slice(0, 3).forEach((r) => lines.push('• ' + truncate(r, 140)));
   }
   lines.push('', 'Periksa pesan atau tautan mencurigakan sebelum diklik di: ' + window.location.origin + window.location.pathname);
-  const text = lines.join('\n');
-  if (navigator.share) {
-    navigator.share({ title: 'Peringatan penipuan', text }).catch((e) => {
-      if (e?.name !== 'AbortError') window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
-    });
-  } else {
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
-  }
+  return lines.join('\n');
+}
+
+function copyWarning(level: string, reasons: string[], actions: string[]) {
+  const text = buildWarningText(level, reasons, actions);
+  return navigator.clipboard.writeText(text);
 }
 
 // ─── 4. Report copy ──────────────────────────────────────────────────────────
@@ -112,119 +111,6 @@ function copyReport(message: string, sender: string, verdict: string, reasons: s
   );
   return navigator.clipboard.writeText(lines.join('\n'));
 }
-
-// ─── 3. TTS speak ───────────────────────────────────────────────────────────
-function speakText(text: string, onDone?: () => void) {
-  if (!('speechSynthesis' in window)) return;
-  if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'id-ID';
-  u.rate = 0.92;
-  try {
-    const v = speechSynthesis.getVoices().find((x) => /^id/i.test(x.lang));
-    if (v) u.voice = v;
-  } catch {}
-  if (onDone) { u.onend = onDone; u.onerror = onDone; }
-  speechSynthesis.speak(u);
-}
-
-// ─── Accessibility panel (mode lansia) ──────────────────────────────────────
-const A11Y_KEY = 'cekdulu_a11y';
-
-interface A11yState { z: number; hc: boolean }
-
-function loadA11y(): A11yState {
-  try { return { z: 1, hc: false, ...JSON.parse(localStorage.getItem(A11Y_KEY) || '{}') }; } catch { return { z: 1, hc: false }; }
-}
-
-function saveA11y(st: A11yState) {
-  try { localStorage.setItem(A11Y_KEY, JSON.stringify(st)); } catch {}
-}
-
-function applyA11y(st: A11yState) {
-  const h = document.documentElement;
-  h.style.zoom = st.z === 1 ? '' : String(st.z);
-  h.classList.toggle('cd-hc', !!st.hc);
-  if (st.hc) h.setAttribute('data-theme', 'light');
-  else if (h.getAttribute('data-theme') === 'light') h.removeAttribute('data-theme');
-  saveA11y(st);
-}
-
-const A11yPanel: React.FC = () => {
-  const [st, setSt] = useState<A11yState>(loadA11y);
-  const [open, setOpen] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-
-  useEffect(() => { applyA11y(st); }, [st]);
-
-  const setZoom = (z: number) => setSt((s) => ({ ...s, z }));
-  const toggleHc = () => setSt((s) => ({ ...s, hc: !s.hc }));
-
-  const readScreen = () => {
-    if (speechSynthesis.speaking) { speechSynthesis.cancel(); setSpeaking(false); return; }
-    const el = document.querySelector('.res') as HTMLElement | null
-      ?? (Array.from(document.querySelectorAll('.fb')) as HTMLElement[]).at(-1);
-    if (!el) return;
-    setSpeaking(true);
-    speakText(el.innerText.replace(/[✓✕]/g, ''), () => setSpeaking(false));
-  };
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && open) setOpen(false); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open]);
-
-  return (
-    <>
-      {open && (
-        <div
-          id="cd-a11y"
-          role="dialog"
-          aria-label="Pengaturan tampilan dan suara"
-        >
-          <h2>Tampilan dan suara</h2>
-          <p className="cd-l">Ukuran teks</p>
-          <div className="cd-row">
-            {([1, 1.15, 1.3] as const).map((z, i) => (
-              <button
-                key={z}
-                type="button"
-                aria-pressed={st.z === z}
-                onClick={() => setZoom(z)}
-              >
-                {['Normal', 'Besar', 'Sangat besar'][i]}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            id="cd-hc"
-            role="switch"
-            aria-checked={st.hc}
-            className="cd-sw"
-            onClick={toggleHc}
-          >
-            <span>Kontras tinggi</span>
-            <i aria-hidden="true" />
-          </button>
-          <button type="button" className="cd-wide" onClick={readScreen}>
-            {speaking ? '⏹ Berhenti membaca' : '🔊 Bacakan hasil di layar'}
-          </button>
-        </div>
-      )}
-      <button
-        id="cd-a11y-btn"
-        type="button"
-        aria-expanded={open}
-        aria-controls="cd-a11y"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span aria-hidden="true" style={{ fontWeight: 800 }}>Aa</span> Tampilan
-      </button>
-    </>
-  );
-};
 
 // ─── Samples ────────────────────────────────────────────────────────────────
 const REFERENCE_SAMPLES = [
@@ -317,6 +203,7 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reportCopied, setReportCopied] = useState(false);
+  const [warningCopied, setWarningCopied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -467,6 +354,15 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
     const text = [verdictText[0], verdictText[1], 'Alasannya.', ...reasonsList.slice(0, 4).map((r) => String(r).replace(' — ', '. ')), 'Yang sebaiknya Anda lakukan.', ...stepsList.slice(0, 3)].join(' ');
     setSpeaking(true);
     speakText(text, () => setSpeaking(false));
+  };
+
+  const handleCopyWarning = async () => {
+    if (!result || !currentLevel) return;
+    try {
+      await copyWarning(currentLevel, reasonsList, stepsList);
+      setWarningCopied(true);
+      setTimeout(() => setWarningCopied(false), 2200);
+    } catch { /* ignore */ }
   };
 
   const handleCopyReport = async () => {
@@ -634,24 +530,34 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
                   )}
 
                   <h3 className="section-h3">Mengapa begitu</h3>
-                  <ul>
-                    {reasonsList.map((r, i) => <li key={i}>{r}</li>)}
-                  </ul>
+                  <ol className="res-steps">
+                    {reasonsList.map((r, i) => (
+                      <li key={i}>
+                        <span className={`res-num ${currentLevel || ''}`}>{i + 1}</span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ol>
 
                   <h3 className="section-h3">Yang sebaiknya Anda lakukan</h3>
-                  <ol>
-                    {stepsList.map((s, i) => <li key={i}>{s}</li>)}
+                  <ol className="res-steps">
+                    {stepsList.map((s, i) => (
+                      <li key={i}>
+                        <span className="res-num">{i + 1}</span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
                   </ol>
 
                   {/* ── Action buttons ── */}
                   <div className="cd-actions">
-                    {/* Bagikan peringatan */}
+                    {/* Salin peringatan untuk keluarga */}
                     <button
                       type="button"
                       className="cd-btn cd-primary"
-                      onClick={() => shareWarning(currentLevel, reasonsList, stepsList)}
+                      onClick={handleCopyWarning}
                     >
-                      📤 Bagikan peringatan
+                      {warningCopied ? '✓ Peringatan tersalin' : '📋 Salin peringatan'}
                     </button>
 
                     {/* Bacakan hasil */}
@@ -691,9 +597,6 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
           </div>
         </div>
       </section>
-
-      {/* Accessibility floating panel */}
-      <A11yPanel />
     </>
   );
 };

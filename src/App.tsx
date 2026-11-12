@@ -11,6 +11,7 @@ import { QuizTab } from './components/QuizTab';
 import { EducationTab } from './components/EducationTab';
 import { UrlInspectorTab } from './components/UrlInspectorTab';
 import { EmergencyModal } from './components/EmergencyModal';
+import { A11yPanel } from './components/A11yPanel';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('assistant');
@@ -91,6 +92,9 @@ export default function App() {
           </span>
         </div>
       </footer>
+
+      {/* Mode Lansia & Tampilan Floating Panel (Tersedia di semua tab) */}
+      <A11yPanel />
     </div>
   );
 }
