@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, PhoneCall } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { EMERGENCY_CONTACTS } from '../data/scamData';
 
 interface EmergencyModalProps {
@@ -71,13 +71,6 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose 
                       <Copy className="w-3.5 h-3.5" />
                     )}
                   </button>
-                  <a
-                    href={`tel:${item.phone.replace(/[^0-9]/g, '')}`}
-                    className="p-1.5 rounded bg-[var(--brand)] text-[var(--brand-ink)]"
-                    title="Panggil"
-                  >
-                    <PhoneCall className="w-3.5 h-3.5" />
-                  </a>
                 </div>
               </div>
             ))}

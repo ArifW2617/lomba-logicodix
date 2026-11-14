@@ -184,8 +184,20 @@ Langkah-langkahnya:
 5. Untuk build produksi:
    ```bash
    npm run build
-   npm run preview
    ```
+   Lalu jalankan server dengan `NODE_ENV=production npm start` (PowerShell: `$env:NODE_ENV="production"; npm start`). Server Express akan melayani frontend hasil build sekaligus endpoint API.
+
+## Deploy gratis di Render
+
+Repositori ini sudah menyertakan `render.yaml` untuk membuat **Web Service** gratis di Render.
+
+1. Push project ke GitHub.
+2. Di Render, pilih **New + → Blueprint**, lalu hubungkan repositori GitHub ini.
+3. Review konfigurasi `cek-dulu` dan deploy. Render akan memasang dependensi, membangun frontend, lalu menjalankan server Express.
+4. Di pengaturan service, buka **Environment** dan tambahkan API key provider yang ingin dipakai, misalnya `GROQ_API_KEY` untuk analisis teks dan `GEMINI_API_KEY` untuk analisis gambar. `OPENROUTER_API_KEY` dapat dipakai sebagai provider cadangan. Jangan masukkan API key ke file atau commit Git.
+5. Setelah deploy selesai, buka URL `.onrender.com` milik service. Uji endpoint status dengan membuka `/api/health` pada domain yang sama.
+
+Render Free dapat menidurkan service yang tidak aktif, sehingga akses pertama setelah beberapa waktu mungkin lambat. Paket hosting gratis tidak mencakup kuota API provider; penggunaan Gemini, Groq, atau OpenRouter tetap mengikuti batas dan biaya masing-masing.
 
 ## Variabel lingkungan
 
