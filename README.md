@@ -2,6 +2,8 @@
 
 Cek Dulu adalah aplikasi web untuk memeriksa pesan atau tautan yang dicurigai sebagai penipuan sebelum sempat diklik, sekaligus tempat belajar mengenali modus-modus yang sedang beredar di Indonesia. Kami membuatnya untuk LOGICODIX 2026 Hackathon dengan tema *NextGen Digital Innovation: Crafting Creative Solutions for a Better Society*.
 
+**Coba aplikasi:** [cek-dulu-logicodix.vercel.app](https://cek-dulu-logicodix.vercel.app/)
+
 ## Tentang tim
 
 - **Nama tim:** DOA DARI ARIF WICAK
