@@ -79,39 +79,6 @@ function copyWarning(level: string, reasons: string[], actions: string[]) {
   return navigator.clipboard.writeText(text);
 }
 
-// ─── 4. Report copy ──────────────────────────────────────────────────────────
-function copyReport(message: string, sender: string, verdict: string, reasons: string[]) {
-  const msg = message.trim();
-  const urls = (msg.match(/https?:\/\/\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)+\/\S*/gi) ?? []).slice(0, 5).map((x) => x.replace(/[.,;)]+$/, ''));
-  const phones = (msg.match(/(?:\+62|62|0)8\d[\d\s-]{7,12}\d/g) ?? []).slice(0, 5);
-  const safe = msg.replace(/\b(otp|kode)(\D{0,12})(\d{4,8})\b/gi, '$1$2••••');
-  const tgl = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const lines = [
-    'LAPORAN DUGAAN PENIPUAN',
-    'Tanggal laporan: ' + tgl,
-    'Dugaan awal: ' + verdict + ' (pemeriksaan awal Cek Dulu)',
-    '',
-    '1. Kronologi singkat',
-    'Saya menerima pesan dari ' + (sender.trim() || '(isi nomor atau akun pengirim)') + ' pada (isi tanggal dan jam).',
-    'Isi pesan:',
-    safe ? '"' + safe + '"' : '(tempel isi pesan atau lampirkan tangkapan layar)',
-    '',
-    '2. Nomor atau tautan yang muncul dalam pesan',
-  ];
-  const seen = [...urls, ...phones];
-  if (seen.length) seen.forEach((x) => lines.push('- ' + x));
-  else lines.push('- (tidak ditemukan otomatis, isi bila ada)');
-  lines.push('', '3. Tanda mencurigakan yang ditemukan');
-  reasons.slice(0, 6).forEach((r) => lines.push('- ' + truncate(r, 200)));
-  lines.push(
-    '', '4. Kerugian (jika ada)', 'Nominal: Rp ...', 'Rekening tujuan: (bank, nomor, atas nama)',
-    '', '5. Tindakan yang sudah saya lakukan', '(contoh: menghubungi bank, memblokir kartu, mengganti kata sandi)',
-    '', '6. Bukti terlampir', 'Tangkapan layar percakapan dan bukti transfer (jika ada)',
-    '', 'Kanal pelaporan: OJK 157 · cekrekening.id · patrolisiber.id'
-  );
-  return navigator.clipboard.writeText(lines.join('\n'));
-}
-
 // ─── Samples ────────────────────────────────────────────────────────────────
 const REFERENCE_SAMPLES = [
   { label: 'Hadiah undian 50 juta', text: 'Selamat! Anda memenangkan hadiah undian Rp50.000.000. Klik tautan berikut untuk klaim hadiah sekarang sebelum hangus: https://hadiah-gelegar-bumn.xyz/klaim', isGood: false },
@@ -202,7 +169,6 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [reportCopied, setReportCopied] = useState(false);
   const [warningCopied, setWarningCopied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -362,15 +328,6 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
       await copyWarning(currentLevel, reasonsList, stepsList);
       setWarningCopied(true);
       setTimeout(() => setWarningCopied(false), 2200);
-    } catch { /* ignore */ }
-  };
-
-  const handleCopyReport = async () => {
-    if (!result || !verdictText) return;
-    try {
-      await copyReport(message, sender, verdictText[0], reasonsList);
-      setReportCopied(true);
-      setTimeout(() => setReportCopied(false), 2200);
     } catch { /* ignore */ }
   };
 
@@ -565,12 +522,6 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
                       {speaking ? '⏹ Berhenti membaca' : '🔊 Bacakan hasil'}
                     </button>
 
-                    {/* Salin laporan – hanya muncul jika bad atau warn */}
-                    {(currentLevel === 'bad' || currentLevel === 'warn') && (
-                      <button type="button" className="cd-btn" onClick={handleCopyReport}>
-                        {reportCopied ? '✓ Laporan tersalin' : '📋 Salin teks laporan'}
-                      </button>
-                    )}
                   </div>
                 </>
               )}
