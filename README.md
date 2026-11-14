@@ -187,17 +187,16 @@ Langkah-langkahnya:
    ```
    Lalu jalankan server dengan `NODE_ENV=production npm start` (PowerShell: `$env:NODE_ENV="production"; npm start`). Server Express akan melayani frontend hasil build sekaligus endpoint API.
 
-## Deploy gratis di Render
+## Deploy gratis di Vercel
 
-Repositori ini sudah menyertakan `render.yaml` untuk membuat **Web Service** gratis di Render.
+Vercel Hobby menyediakan hosting gratis untuk project personal/non-komersial. Frontend dibangun sebagai situs statis Vite, sedangkan endpoint AI dijalankan sebagai Vercel Function di `api/[...path].ts`.
 
 1. Push project ke GitHub.
-2. Di Render, pilih **New + → Blueprint**, lalu hubungkan repositori GitHub ini.
-3. Review konfigurasi `cek-dulu` dan deploy. Render akan memasang dependensi, membangun frontend, lalu menjalankan server Express.
-4. Di pengaturan service, buka **Environment** dan tambahkan API key provider yang ingin dipakai, misalnya `GROQ_API_KEY` untuk analisis teks dan `GEMINI_API_KEY` untuk analisis gambar. `OPENROUTER_API_KEY` dapat dipakai sebagai provider cadangan. Jangan masukkan API key ke file atau commit Git.
-5. Setelah deploy selesai, buka URL `.onrender.com` milik service. Uji endpoint status dengan membuka `/api/health` pada domain yang sama.
+2. Di Vercel, pilih **Add New → Project**, lalu impor repositori GitHub ini. Biarkan Vercel memakai konfigurasi `vercel.json` untuk build.
+3. Sebelum deploy, tambahkan API key di **Settings → Environment Variables**. Gunakan `GROQ_API_KEY` untuk analisis teks, `GEMINI_API_KEY` untuk analisis gambar, dan `OPENROUTER_API_KEY` sebagai provider cadangan. Jangan beri awalan `VITE_` pada key; key harus tetap di server.
+4. Deploy, lalu buka URL `.vercel.app` milik project. Uji `/api/health` pada domain yang sama.
 
-Render Free dapat menidurkan service yang tidak aktif, sehingga akses pertama setelah beberapa waktu mungkin lambat. Paket hosting gratis tidak mencakup kuota API provider; penggunaan Gemini, Groq, atau OpenRouter tetap mengikuti batas dan biaya masing-masing.
+Vercel Hobby memiliki kuota penggunaan bulanan dan ditujukan untuk proyek personal/non-komersial. Kuota atau biaya layanan AI dari Gemini, Groq, dan OpenRouter terpisah dari kuota hosting Vercel.
 
 ## Variabel lingkungan
 
