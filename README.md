@@ -50,7 +50,7 @@ Simulasi percakapan interaktif. Pengguna membaca pesan dari "penipu", memilih re
 
 ### Kuis edukasi
 
-14 soal berbasis kasus, terbagi dalam tiga tingkat: Pemula, Menengah, dan Mahir. Setiap jawaban disertai penjelasan, baik yang benar maupun yang salah. Poin XP tersimpan di browser pengguna.
+8 soal berbasis kasus, terbagi dalam tiga tingkat: Pemula, Menengah, dan Mahir. Setiap jawaban disertai penjelasan, baik yang benar maupun yang salah. Poin XP tersimpan di browser pengguna.
 
 ### Ensiklopedia modus
 
