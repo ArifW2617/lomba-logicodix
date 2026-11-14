@@ -33,7 +33,6 @@ Pengguna bisa menempel teks chat atau SMS, atau mengunggah tangkapan layar. Hasi
 Beberapa hal yang bisa dilakukan dari hasil pemeriksaan:
 
 - Menyalin ringkasan peringatan untuk dikirim ke grup keluarga.
-- Menyalin draf laporan yang sudah berisi kronologi dan kanal pengaduan resmi (OJK 157, cekrekening.id, patrolisiber.id). Kode OTP di dalam pesan otomatis disamarkan menjadi `••••`.
 - Mendengarkan hasil pemeriksaan lewat suara.
 
 Kalau layanan AI sedang bermasalah, aplikasi tetap memberi jawaban lewat mesin aturan lokal (lihat bagian arsitektur).
@@ -123,19 +122,71 @@ Mesin aturan lokal bekerja dengan pencocokan kata kunci dan pola, misalnya berka
 
 ## Teknologi
 
-- **Frontend:** React 19, TypeScript 5.8+, Tailwind CSS v4, Motion untuk animasi, Lucide React untuk ikon
+- **Frontend:** React 19, TypeScript 7, Tailwind CSS v4, Motion untuk animasi, Lucide React untuk ikon
 - **Build:** Vite 8 dengan `vite-plugin-singlefile`, sehingga hasil build berupa satu berkas `dist/index.html`
 - **Backend:** Node.js, Express, `tsx`
 - **AI:** Google Gemini lewat `@google/genai`, Groq dan OpenRouter lewat REST API
 - **Suara:** Web Speech API (`SpeechSynthesis`)
+
+## Dokumentasi frontend
+
+Frontend adalah aplikasi satu halaman React. `src/main.tsx` memasang `App` dan stylesheet utama. `App` mengatur tab aktif, skor kuis, modal darurat, serta panel aksesibilitas.
+
+Struktur utama:
+
+```text
+src/
+├── App.tsx                    # Kerangka aplikasi dan navigasi antar-tab
+├── main.tsx                   # Entry point React; memuat index.css
+├── index.css                  # Gaya global, tema, dan layout
+├── types.ts                   # Tipe data hasil AI, kuis, simulasi, dan modus
+├── data/scamData.ts           # Konten kuis, simulasi, kontak, dan edukasi
+└── components/
+    ├── Header.tsx             # Navigasi dan skor
+    ├── AiScannerTab.tsx       # Form pemeriksaan pesan/gambar dan hasil
+    ├── UrlInspectorTab.tsx    # Pemeriksaan struktur URL
+    ├── SimulationTab.tsx      # Simulasi kasus
+    ├── QuizTab.tsx            # Kuis edukasi
+    ├── EducationTab.tsx       # Ensiklopedia modus
+    ├── EmergencyModal.tsx     # Panduan dan kontak darurat
+    └── A11yPanel.tsx          # Pengaturan aksesibilitas
+```
+
+Aset statis seperti favicon berada di `public/`; metadata dan pemuatan font didefinisikan di `index.html`. Vite menggabungkan frontend menjadi `dist/index.html` saat build.
+
+## Dokumentasi backend
+
+Server Express menyediakan API berikut. Di Vercel, `api/[...path].ts` meneruskan permintaan `/api/*` ke router yang sama.
+
+| Method | Endpoint | Fungsi |
+|---|---|---|
+| `POST` | `/api/analyze-scam` | Menganalisis teks dan/atau gambar melalui provider AI, dengan fallback aturan lokal. |
+| `GET` | `/api/health` | Memeriksa server serta status konfigurasi provider AI. |
+
+Contoh body `POST /api/analyze-scam`:
+
+```json
+{
+  "message": "Pesan yang ingin diperiksa",
+  "context": "Informasi pengirim (opsional)",
+  "image": {
+    "data": "base64 (opsional)",
+    "mimeType": "image/png"
+  }
+}
+```
+
+`message` dan `image` dapat dikirim sendiri-sendiri atau bersama-sama. Jika keduanya tidak tersedia, API mengembalikan `400`; hasil analisis dikembalikan sebagai JSON terstruktur. `GET /api/health` mengembalikan `status`, `aiEnabled`, status tiap provider, dan waktu pemeriksaan.
+
+**Database:** aplikasi tidak menggunakan database maupun memiliki skema database. Pesan dan gambar hanya diproses server saat permintaan berlangsung, lalu tidak disimpan oleh aplikasi. Skor kuis dan preferensi aksesibilitas disimpan secara lokal di browser (`localStorage`), bukan di server.
+
+**Konfigurasi:** salin [`.env.example`](./.env.example) menjadi `.env` untuk pengembangan lokal. File itu mencantumkan API key provider, pilihan model, urutan provider, timeout/retry, URL aplikasi, dan port. Jangan commit `.env` atau membagikan API key. Pada Vercel, masukkan nilai yang dibutuhkan melalui **Settings → Environment Variables**; jangan menggunakan awalan `VITE_` untuk API key server.
 
 ## Etika dan keamanan digital
 
 **Privasi.** Server tidak punya database, jadi pesan, nomor telepon, dan tangkapan layar pengguna tidak disimpan. Setiap permintaan diproses lalu dibuang dari memori. Meski begitu, isi pesan memang dikirim ke penyedia AI (Groq, Google, atau OpenRouter) saat dianalisis, dan kebijakan data mereka tetap berlaku. Karena itu form pemeriksaan memuat pengingat: *jangan menempel kode OTP, PIN, atau nomor kartu asli, hapus dulu sebelum memeriksa*.
 
 **Kunci API.** Semua kunci disimpan di berkas `.env` yang masuk `.gitignore`. Tidak ada kunci yang ditulis langsung di kode atau di repositori.
-
-**Data sensitif di draf laporan.** Saat pengguna menyalin draf laporan, angka OTP dan kode verifikasi di dalam pesan disamarkan lebih dulu supaya tidak ikut tersebar.
 
 **Hasil bukan putusan.** Aplikasi ini alat bantu. Kami mencantumkan di hasil pemeriksaan bahwa pengguna tetap perlu memastikan lewat jalur resmi, misalnya menelepon nomor di belakang kartu bank.
 
@@ -147,16 +198,16 @@ Tidak perlu akun. Cek Dulu tidak memakai login atau pendaftaran, jadi juri bisa 
 
 Yang dibutuhkan:
 
-- Node.js 20 atau lebih baru (kami memakai Node.js 22 LTS)
-- npm 9 atau lebih baru
+- Node.js 22.12 atau lebih baru (sesuai batas minimum di `package.json`)
+- npm yang disertakan bersama Node.js
 - Browser modern (Chrome, Edge, Firefox, atau Safari)
 
 Langkah-langkahnya:
 
 1. Clone repositori.
    ```bash
-   git clone https://github.com/username-anda/cek-dulu.git
-   cd cek-dulu
+   git clone https://github.com/ArifW2617/lomba-logicodix.git
+   cd lomba-logicodix
    ```
 
 2. Pasang dependensi.
