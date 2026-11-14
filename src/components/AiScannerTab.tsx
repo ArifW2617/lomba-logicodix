@@ -90,70 +90,6 @@ const REFERENCE_SAMPLES = [
   { label: 'Pesan OTP resmi (aman)', text: 'Kode OTP Anda 483921. Jangan berikan kode ini kepada siapa pun, termasuk pihak bank. Berlaku 5 menit.', isGood: true },
 ];
 
-function createMockScreenshotDataUri(type: 'apk' | 'bank' | 'prize'): string {
-  let svgContent = '';
-  if (type === 'apk') {
-    svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
-      <rect width="600" height="420" fill="#0b141a"/>
-      <rect width="600" height="60" fill="#202c33"/>
-      <circle cx="35" cy="30" r="18" fill="#536471"/>
-      <text x="35" y="36" fill="#ffffff" font-size="16" text-anchor="middle" font-family="sans-serif">📦</text>
-      <text x="65" y="28" fill="#e9edef" font-size="15" font-weight="bold" font-family="sans-serif">Kurir J&amp;T Paket Budi</text>
-      <text x="65" y="46" fill="#8696a0" font-size="12" font-family="sans-serif">+62 821-9981-0231 • Online</text>
-      <g transform="translate(40, 90)">
-        <path d="M 0 10 Q 0 0 10 0 L 460 0 Q 470 0 470 10 L 470 170 Q 470 180 460 180 L 20 180 Q 0 180 0 160 Z" fill="#202c33"/>
-        <text x="18" y="30" fill="#e9edef" font-size="14" font-family="sans-serif">Selamat siang kak, saya kurir ekspedisi.</text>
-        <text x="18" y="52" fill="#e9edef" font-size="14" font-family="sans-serif">Paket atas nama Anda alamatnya buram.</text>
-        <text x="18" y="74" fill="#e9edef" font-size="14" font-family="sans-serif">Mohon cek foto paket di bawah ini:</text>
-        <rect x="18" y="90" width="434" height="65" rx="8" fill="#111b21" stroke="#ef4444" stroke-width="1.5"/>
-        <rect x="30" y="100" width="44" height="45" rx="6" fill="#ef4444" fill-opacity="0.2"/>
-        <text x="52" y="128" fill="#ef4444" font-size="18" text-anchor="middle" font-weight="bold" font-family="sans-serif">APK</text>
-        <text x="86" y="116" fill="#e9edef" font-size="13" font-weight="bold" font-family="sans-serif">LIHAT_FOTO_PAKET_JNT.apk</text>
-        <text x="86" y="135" fill="#8696a0" font-size="11" font-family="sans-serif">5.8 MB • File Paket Aplikasi Android</text>
-      </g>
-    </svg>`;
-  } else if (type === 'bank') {
-    svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
-      <rect width="600" height="420" fill="#0b141a"/>
-      <rect width="600" height="60" fill="#202c33"/>
-      <circle cx="35" cy="30" r="18" fill="#0066ae"/>
-      <text x="35" y="36" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle" font-family="sans-serif">CS</text>
-      <text x="65" y="28" fill="#e9edef" font-size="15" font-weight="bold" font-family="sans-serif">Customer Service Bank Resmi</text>
-      <text x="65" y="46" fill="#ef4444" font-size="12" font-family="sans-serif">+62 858-1029-3849 (Tanpa Centang Hijau)</text>
-      <g transform="translate(40, 85)">
-        <path d="M 0 10 Q 0 0 10 0 L 480 0 Q 490 0 490 10 L 490 190 Q 490 200 480 200 L 20 200 Q 0 200 0 180 Z" fill="#202c33"/>
-        <text x="18" y="28" fill="#f59e0b" font-size="13" font-weight="bold" font-family="sans-serif">PEMBERITAHUAN RESMI KENAIKAN TARIF</text>
-        <text x="18" y="52" fill="#e9edef" font-size="13" font-family="sans-serif">Yth. Nasabah, terhitung mulai besok tarif transfer</text>
-        <text x="18" y="72" fill="#e9edef" font-size="13" font-family="sans-serif">akan disesuaikan menjadi Rp150.000 per bulan.</text>
-        <text x="18" y="100" fill="#e9edef" font-size="13" font-family="sans-serif">Jika Anda keberatan, segera batalkan:</text>
-        <rect x="18" y="112" width="454" height="40" rx="6" fill="#111b21" stroke="#38bdf8" stroke-width="1"/>
-        <text x="28" y="137" fill="#38bdf8" font-size="13" font-weight="bold" font-family="sans-serif">👉 https://bca-klik-tarifbatal.site/verifikasi</text>
-      </g>
-    </svg>`;
-  } else {
-    svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
-      <rect width="600" height="420" fill="#0b141a"/>
-      <rect width="600" height="60" fill="#1e293b"/>
-      <text x="300" y="35" fill="#f8fafc" font-size="15" font-weight="bold" text-anchor="middle" font-family="sans-serif">SMS DARI: +62 838-2910-4491</text>
-      <g transform="translate(45, 95)">
-        <rect width="510" height="175" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-        <text x="20" y="32" fill="#38bdf8" font-size="14" font-weight="bold" font-family="sans-serif">🎁 GEBYAR PROMO AKHIR TAHUN 2026</text>
-        <text x="20" y="60" fill="#f8fafc" font-size="13" font-family="sans-serif">Selamat! Nomor Anda resmi terpilih sebagai pemenang</text>
-        <text x="20" y="80" fill="#4ade80" font-size="14" font-weight="bold" font-family="sans-serif">Uang Tunai Rp 50.000.000.</text>
-        <text x="20" y="108" fill="#f8fafc" font-size="13" font-family="sans-serif">Klaim sebelum hangus 1x24 jam:</text>
-        <text x="20" y="132" fill="#f43f5e" font-size="13" font-weight="bold" font-family="sans-serif">http://hadiah-gelegar-bumn.xyz/klaim</text>
-      </g>
-    </svg>`;
-  }
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent.trim())}`;
-}
-
-const SAMPLE_SCREENSHOTS = [
-  { label: 'Kurir paket .apk (gambar)', type: 'apk' as const },
-  { label: 'CS bank tarif naik (gambar)', type: 'bank' as const },
-  { label: 'SMS hadiah 50jt (gambar)', type: 'prize' as const },
-];
-
 // ─── Main component ──────────────────────────────────────────────────────────
 interface AiScannerTabProps {
   onGoToQuiz: () => void;
@@ -205,15 +141,6 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
   };
 
   const handleSelectSampleText = (text: string) => { setMode('text'); setMessage(text); setResult(null); setError(null); };
-  const handleSelectSampleScreenshot = (type: 'apk' | 'bank' | 'prize') => {
-    setMode('img');
-    const dataUri = createMockScreenshotDataUri(type);
-    setImagePreview(dataUri);
-    const base64Data = btoa(decodeURIComponent(dataUri.replace('data:image/svg+xml;charset=utf-8,', '')));
-    setImageData({ data: base64Data, mimeType: 'image/svg+xml' });
-    setResult(null); setError(null);
-  };
-
   const handleAnalyze = useCallback(async () => {
     const hasText = message.trim().length > 0;
     const hasImg = Boolean(imageData?.data);
@@ -403,18 +330,16 @@ export const AiScannerTab: React.FC<AiScannerTabProps> = () => {
             <p className="note">Jangan menempel kode OTP, PIN, atau nomor kartu asli. Hapus dulu sebelum memeriksa.</p>
           </div>
 
-          <div className="samples">
-            <p>{mode === 'text' ? 'Belum punya pesan? Coba salah satu contoh:' : 'Coba contoh screenshot:'}</p>
-            <div className="chips">
-              {mode === 'text'
-                ? REFERENCE_SAMPLES.map((s, i) => (
-                    <button key={i} type="button" className={`chip${s.isGood ? ' good' : ''}`} onClick={() => handleSelectSampleText(s.text)}>{s.label}</button>
-                  ))
-                : SAMPLE_SCREENSHOTS.map((s, i) => (
-                    <button key={i} type="button" className="chip" onClick={() => handleSelectSampleScreenshot(s.type)}>{s.label}</button>
-                  ))}
+          {mode === 'text' && (
+            <div className="samples">
+              <p>Belum punya pesan? Coba salah satu contoh:</p>
+              <div className="chips">
+                {REFERENCE_SAMPLES.map((s, i) => (
+                  <button key={i} type="button" className={`chip${s.isGood ? ' good' : ''}`} onClick={() => handleSelectSampleText(s.text)}>{s.label}</button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column: Panel */}
